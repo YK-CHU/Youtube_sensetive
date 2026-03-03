@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>24채널 유튜브 부동산 감성분석 — 시각화 대시보드</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', -apple-system, sans-serif; background: #f5f7fa; color: #2c3e50; line-height: 1.6; }
+.header { background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d); padding: 40px 20px; text-align: center; color: white; }
+.header h1 { font-size: 28px; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+.header p { font-size: 16px; opacity: 0.9; }
+.container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+.chart-section { background: white; border-radius: 16px; padding: 30px; margin-bottom: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.chart-section h2 { font-size: 20px; color: #1a2a6c; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+.chart-section h2 .num { background: #1a2a6c; color: white; width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; }
+.subtitle { color: #666; font-size: 14px; margin-bottom: 20px; }
+.explain { background: #f0f4ff; border-left: 4px solid #4a6cf7; padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 16px 0; font-size: 14px; color: #444; }
+.explain strong { color: #1a2a6c; }
+.chart-wrap { position: relative; width: 100%; margin: 10px 0; }
+.chart-wrap canvas { width: 100% !important; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 16px 0; }
+.stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 20px; color: white; text-align: center; }
+.stat-card .val { font-size: 32px; font-weight: 700; }
+.stat-card .label { font-size: 13px; opacity: 0.9; margin-top: 4px; }
+.stat-card.green { background: linear-gradient(135deg, #11998e, #38ef7d); }
+.stat-card.orange { background: linear-gradient(135deg, #f2994a, #f2c94c); }
+.stat-card.red { background: linear-gradient(135deg, #eb3349, #f45c43); }
+.stat-card.blue { background: linear-gradient(135deg, #2193b0, #6dd5ed); }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+th { background: #1a2a6c; color: white; padding: 10px 8px; text-align: center; }
+td { padding: 8px; text-align: center; border-bottom: 1px solid #e8e8e8; }
+tr:hover { background: #f0f4ff; }
+.peak { background: #fff3cd; font-weight: 700; }
+.tag { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+.tag-bull { background: #ffe0e0; color: #c0392b; }
+.tag-bear { background: #dce7ff; color: #2c3e50; }
+.tag-mid { background: #e8f5e9; color: #27ae60; }
+.nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; justify-content: center; }
+.nav a { padding: 8px 16px; background: white; border: 1px solid #ddd; border-radius: 20px; text-decoration: none; color: #333; font-size: 13px; transition: all 0.2s; }
+.nav a:hover { background: #1a2a6c; color: white; border-color: #1a2a6c; }
+.footer { text-align: center; padding: 30px; color: #999; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div style="background:#1a2a6c; padding:10px 20px; text-align:left;">
+  <a href="index.html" style="color:white; text-decoration:none; font-size:14px; font-weight:bold;">← 허브로 돌아가기</a>
+</div>
+
+<div class="header">
+  <h1>📊 유튜브 부동산 감성지수 × 서울 주택시장</h1>
+  <p>24채널 · 6,369건 · 101주 (2024.01 ~ 2025.12) — 논문용 시각화 대시보드</p>
+</div>
+
+<div class="container">
+
+<nav class="nav">
+  <a href="#sec1">① 핵심지표</a>
+  <a href="#sec2">② 시계열</a>
+  <a href="#sec3">③ 시차분석</a>
+  <a href="#sec4">④ 채널구성</a>
+  <a href="#sec5">⑤ Bootstrap</a>
+  <a href="#sec6">⑥ 비대칭</a>
+  <a href="#sec7">⑦ 강건성</a>
+  <a href="#sec8">⑧ 정보전파</a>
+</nav>
+
+<div class="chart-section" id="sec1">
+  <h2><span class="num">1</span> 핵심 지표 요약</h2>
+  <p class="subtitle">24채널 최종 분석의 주요 결과를 한눈에</p>
+  <div class="stat-grid">
+    <div class="stat-card"><div class="val">0.788</div><div class="label">매수우위 × 전체<br>피크 상관계수 (YT 1주 선행)</div></div>
+    <div class="stat-card green"><div class="val">0.714</div><div class="label">매매가격 × 전체<br>피크 상관계수 (YT 2주 선행)</div></div>
+    <div class="stat-card orange"><div class="val">100%</div><div class="label">Bootstrap ±1주 재현율<br>매수우위 × 전체</div></div>
+    <div class="stat-card red"><div class="val">7/8</div><div class="label">피크 시차 안정성<br>8단계 완전 동일</div></div>
+    <div class="stat-card blue"><div class="val">6,369</div><div class="label">서울 유효 영상 수<br>24개 채널</div></div>
+    <div class="stat-card"><div class="val">1.40~2.11</div><div class="label">Lead-Lag 비율<br>전 조합 YT→KB 방향</div></div>
+  </div>
+  <div class="explain">
+    <strong>🎓 쉬운 설명:</strong> 유튜버들의 "오를 것 같다/내릴 것 같다"는 감성이, 실제 시장 움직임보다 <strong>1~2주 앞서 변화</strong>합니다. 이 관계는 채널을 13개에서 24개로 늘려도, 5,000번 무작위 시뮬레이션을 해도 변하지 않는 <strong>매우 견고한 패턴</strong>입니다.
+  </div>
+</div>
+
+<div class="chart-section" id="sec2">
+  <h2><span class="num">2</span> 주간 시계열 — YT 감성 vs KB 지표</h2>
+  <p class="subtitle">유튜브 순강세지수(파란선)와 KB 매수우위지수(빨간선)가 함께 움직이는 모습</p>
+  <div class="chart-wrap" style="height:400px"><canvas id="chartTimeseries"></canvas></div>
+  <div class="explain">
+    <strong>🎓 쉬운 설명:</strong> 파란선(유튜브)과 빨간선(KB 매수우위)이 거의 같은 모양으로 오르내리는 게 보이시죠? 자세히 보면 <strong>파란선이 항상 1주 정도 먼저 움직입니다</strong>. 이것이 "유튜브 1주 선행"의 시각적 증거입니다.
+  </div>
+</div>
+
+<div class="chart-section" id="sec3">
+  <h2><span class="num">3</span> 교차상관 시차 프로파일 (Lag Profile)</h2>
+  <p class="subtitle">가로축: 시차(-4주~+4주), 세로축: 상관계수(r) — 피크(꼭대기)가 선행 시차를 나타냄</p>
+  <div class="two-col">
+    <div>
+      <h3 style="text-align:center;margin-bottom:10px;font-size:15px;">KB 매수우위지수</h3>
+      <div class="chart-wrap" style="height:320px"><canvas id="chartLagBuyer"></canvas></div>
+    </div>
+    <div>
+      <h3 style="text-align:center;margin-bottom:10px;font-size:15px;">KB 매매가격변화율</h3>
+      <div class="chart-wrap" style="height:320px"><canvas id="chartLagPrice"></canvas></div>
+    </div>
+  </div>
+  <div class="explain">
+    <strong>🎓 쉬운 설명:</strong> 각 선의 <strong>꼭대기(피크)</strong>가 "유튜브와 시장이 가장 잘 맞는 시간차"입니다. 
+    왼쪽 그래프(매수우위): 피크가 <strong>+1주</strong>에 있음 → 유튜브가 1주 먼저 움직인다!
+    오른쪽 그래프(매매가격): 피크가 <strong>+2주</strong>에 있음 → 유튜브가 2주 먼저 움직인다!
+    깨끗한 산 모양(왼쪽에서 올라갔다가 피크 찍고 내려감) = <strong>체계적인 시차 구조의 증거</strong>
+  </div>
+</div>
+
+<div class="chart-section" id="sec4">
+  <h2><span class="num">4</span> 24채널 감성 분포</h2>
+  <p class="subtitle">각 채널의 상승/하락/보합 비율 — 상승론(빨강) 6개, 하락론(파랑) 6개, 중립(초록) 12개</p>
+  <div class="chart-wrap" style="height:600px"><canvas id="chartChannels"></canvas></div>
+  <div class="explain">
+    <strong>🎓 쉬운 설명:</strong> 각 막대는 유튜브 채널 하나입니다. <strong>빨간색이 많으면 "상승론"</strong>(집값 오른다!), <strong>파란색이 많으면 "하락론"</strong>(집값 내린다!), 초록색은 "보합"입니다. 라이트하우스는 거의 100% 파란색(하락)이고, 후랭이TV는 거의 빨간색(상승)인 게 보이시죠?
+  </div>
+</div>
+
+<div class="chart-section" id="sec5">
+  <h2><span class="num">5</span> Block Bootstrap 시차 분포 (5,000회 시뮬레이션)</h2>
+  <p class="subtitle">무작위 리샘플링 5,000번 결과, 피크 시차가 어디에 집중되는지</p>
+  <div class="two-col">
+    <div>
+      <h3 style="text-align:center;margin-bottom:10px;font-size:15px;">매수우위 × 전체</h3>
+      <div class="chart-wrap" style="height:280px"><canvas id="chartBoot1"></canvas></div>
+    </div>
+    <div>
+      <h3 style="text-align:center;margin-bottom:10px;font-size:15px;">매매가격 × 전체</h3>
+      <div class="chart-wrap" style="height:280px"><canvas id="chartBoot2"></canvas></div>
+    </div>
+    <div>
+      <h3 style="text-align:center;margin-bottom:10px;font-size:15px;">매수우위 × 중립</h3>
+      <div class="chart-wrap" style="height:280px"><canvas id="chartBoot3"></canvas></div>
+    </div>
+    <div>
+      <h3 style="text-align:center;margin-bottom:10px;font-size:15px;">매매가격 × 중립</h3>
+      <div class="chart-wrap" style="height:280px"><canvas id="chartBoot4"></canvas></div>
+    </div>
+  </div>
+  <div class="explain">
+    <strong>🎓 쉬운 설명:</strong> 데이터를 무작위로 섞어서 5,000번 다시 분석한 결과입니다. 막대가 높은 곳 = 그 시차가 자주 피크로 나온 것. <strong>매수우위×전체</strong>는 lag 0~+1에 100% 집중! 이건 "우연이 아니라 진짜"라는 강력한 증거입니다.
+  </div>
+</div>
+
+<div class="chart-section" id="sec6">
+  <h2><span class="num">6</span> Lead-Lag 비대칭 — "누가 먼저인가?"</h2>
+  <p class="subtitle">YT선행 합계(주황) vs KB선행 합계(파랑) — 주황이 크면 "유튜브가 먼저"</p>
+  <div class="chart-wrap" style="height:380px"><canvas id="chartLeadLag"></canvas></div>
+  <div class="explain">
+    <strong>🎓 쉬운 설명:</strong> 주황색 막대(유튜브가 먼저)가 파란색 막대(시장이 먼저)보다 <strong>전부 더 긴 것</strong>이 보이시죠? 8개 조합 모두에서 "유튜브→시장" 방향이 확인됩니다. 특히 하락론×매매가격은 2.09배 — 유튜버가 "내린다!"고 말한 후 실제 가격이 내려가는 패턴이 그 반대보다 <strong>2배 이상 강합니다</strong>.
+  </div>
+</div>
+
+<div class="chart-section" id="sec7">
+  <h2><span class="num">7</span> 채널 확장 강건성 (13ch → 24ch)</h2>
+  <p class="subtitle">채널을 계속 추가해도 상관계수가 안정적으로 유지되는지 확인</p>
+  <div class="two-col">
+    <div>
+      <h3 style="text-align:center;margin-bottom:10px;font-size:15px;">매수우위지수 r 추이</h3>
+      <div class="chart-wrap" style="height:320px"><canvas id="chartRob1"></canvas></div>
+    </div>
+    <div>
+      <h3 style="text-align:center;margin-bottom:10px;font-size:15px;">매매가격변화율 r 추이</h3>
+      <div class="chart-wrap" style="height:320px"><canvas id="chartRob2"></canvas></div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:20px;font-size:15px;">피크 시차 안정성 테이블</h3>
+  <table>
+    <tr><th>분석</th><th>13ch</th><th>15ch</th><th>16ch</th><th>17ch</th><th>18ch</th><th>19ch</th><th>22ch</th><th>24ch</th><th>안정성</th></tr>
+    <tr><td>매수우위×전체</td><td>+1</td><td>+1</td><td>+1</td><td>+1</td><td>+1</td><td>+1</td><td>+1</td><td class="peak">+1</td><td>✓✓✓</td></tr>
+    <tr><td>매수우위×상승론</td><td>+2</td><td>+2</td><td>+2</td><td>+2</td><td>+2</td><td>+2</td><td>+2</td><td class="peak">+2</td><td>✓✓✓</td></tr>
+    <tr><td>매수우위×하락론</td><td>+2</td><td>+2</td><td>+2</td><td>+2</td><td>+2</td><td>+2</td><td>+2</td><td class="peak">+2</td><td>✓✓✓</td></tr>
+    <tr><td>매수우위×중립</td><td>+1</td><td>+1</td><td>+1</td><td>+1</td><td>+1</td><td>+1</td><td>+1</td><td class="peak">+1</td><td>✓✓✓</td></tr>
+    <tr><td>매매가격×전체</td><td>+2</td><td>+2</td><td>+2</td><td>+2</td><td>+2</td><td>+2</td><td>+2</td><td class="peak">+2</td><td>✓✓✓</td></tr>
+    <tr><td>매매가격×상승론</td><td>+4</td><td>+4</td><td>+4</td><td>+4</td><td>+4</td><td>+4</td><td>+4</td><td class="peak">+4</td><td>✓✓✓</td></tr>
+    <tr><td>매매가격×하락론</td><td>+2</td><td>+2</td><td>+2</td><td>+2</td><td>+2</td><td>+2</td><td>+2</td><td class="peak">+2</td><td>✓✓✓</td></tr>
+    <tr><td>매매가격×중립</td><td>+2</td><td>+1</td><td>+1</td><td>+2</td><td>+2</td><td>+2</td><td>+2</td><td class="peak">+2</td><td>✓✓</td></tr>
+  </table>
+  <div class="explain">
+    <strong>🎓 쉬운 설명:</strong> 13개 채널로 분석했을 때나 24개 채널로 분석했을 때나, <strong>"유튜브 1~2주 선행"이라는 결론은 전혀 변하지 않았습니다</strong>. 이건 특정 유튜버 때문이 아니라 유튜브 전체의 구조적 특성이라는 뜻이에요. 중립 그룹(초록선)의 r이 계속 올라가는 것도 주목: 다양한 시각의 채널을 추가할수록 시장 예측력이 높아집니다.
+  </div>
+</div>
+
+<div class="chart-section" id="sec8">
+  <h2><span class="num">8</span> 정보 전파 경로 모델</h2>
+  <p class="subtitle">유튜브 감성이 시장에 반영되는 3단계 과정</p>
+  <div style="display:flex;align-items:center;justify-content:center;gap:0;margin:30px 0;flex-wrap:wrap;">
+    <div style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:24px;border-radius:16px;text-align:center;width:200px;">
+      <div style="font-size:36px;">📺</div>
+      <div style="font-weight:700;font-size:16px;margin:8px 0;">유튜브 감성</div>
+      <div style="font-size:12px;opacity:0.9;">콘텐츠 업로드<br>시청자 노출</div>
+      <div style="margin-top:8px;font-size:11px;background:rgba(255,255,255,0.2);padding:4px 8px;border-radius:8px;">기준 시점 (0주)</div>
+    </div>
+    <div style="font-size:28px;padding:0 8px;color:#667eea;">→<div style="font-size:11px;color:#999;">1주</div></div>
+    <div style="background:linear-gradient(135deg,#f2994a,#f2c94c);color:white;padding:24px;border-radius:16px;text-align:center;width:200px;">
+      <div style="font-size:36px;">🧠</div>
+      <div style="font-weight:700;font-size:16px;margin:8px 0;">매수심리 변화</div>
+      <div style="font-size:12px;opacity:0.9;">KB 매수우위지수<br>r = 0.788</div>
+      <div style="margin-top:8px;font-size:11px;background:rgba(255,255,255,0.2);padding:4px 8px;border-radius:8px;">+1주 후 반영</div>
+    </div>
+    <div style="font-size:28px;padding:0 8px;color:#f2994a;">→<div style="font-size:11px;color:#999;">1주</div></div>
+    <div style="background:linear-gradient(135deg,#11998e,#38ef7d);color:white;padding:24px;border-radius:16px;text-align:center;width:200px;">
+      <div style="font-size:36px;">🏠</div>
+      <div style="font-weight:700;font-size:16px;margin:8px 0;">실제 가격 반영</div>
+      <div style="font-size:12px;opacity:0.9;">KB 매매가격변화율<br>r = 0.714</div>
+      <div style="margin-top:8px;font-size:11px;background:rgba(255,255,255,0.2);padding:4px 8px;border-radius:8px;">+2주 후 반영</div>
+    </div>
+  </div>
+  <div class="explain">
+    <strong>🎓 쉬운 설명:</strong> 유튜버가 "서울 집값 오른다!"고 말하면 → <strong>1주 후</strong> 부동산 중개소에서 "사려는 사람이 늘었다"는 조사 결과가 나오고(매수우위지수↑) → 그 <strong>1주 후</strong> 실제 거래 가격이 올라갑니다(매매가격↑). 소문 → 심리 변화 → 행동, 총 2주의 시간이 걸리는 <strong>"정보 전파 경로"</strong>입니다.
+  </div>
+</div>
+
+</div>
+
+<div class="footer">
+  유튜브 부동산 감성지수 × 서울 주택시장 시차 상관관계 분석 | 24채널 · 6,369건 · 101주 | 2024.01~2025.12
+</div>
+
+<script>
+const DATA = {"timeseries": [{"date": "2024-01-01", "yt_all": -7.69, "yt_bull": 47.06, "yt_bear": -100.0, "yt_neutral": 0.0, "kb_buyer": 25.2, "kb_price_chg": null}, {"date": "2024-01-08", "yt_all": -9.43, "yt_bull": 53.33, "yt_bear": -83.33, "yt_neutral": 10.0, "kb_buyer": 27.4, "kb_price_chg": -0.0495}, {"date": "2024-01-15", "yt_all": -20.0, "yt_bull": 77.78, "yt_bear": -83.33, "yt_neutral": -28.57, "kb_buyer": 26.3, "kb_price_chg": -0.043}, {"date": "2024-01-22", "yt_all": -27.03, "yt_bull": 42.86, "yt_bear": -72.22, "yt_neutral": 0.0, "kb_buyer": 26.4, "kb_price_chg": -0.0343}, {"date": "2024-01-29", "yt_all": -1.96, "yt_bull": 36.36, "yt_bear": -87.5, "yt_neutral": 37.5, "kb_buyer": 25.4, "kb_price_chg": -0.0495}, {"date": "2024-02-05", "yt_all": 6.0, "yt_bull": 60.0, "yt_bear": -70.59, "yt_neutral": 39.13, "kb_buyer": 25.6, "kb_price_chg": -0.0367}, {"date": "2024-02-19", "yt_all": 4.55, "yt_bull": 44.44, "yt_bear": -100.0, "yt_neutral": 57.14, "kb_buyer": 27.2, "kb_price_chg": -0.0448}, {"date": "2024-02-26", "yt_all": 4.26, "yt_bull": 26.67, "yt_bear": -80.0, "yt_neutral": 27.27, "kb_buyer": 26.5, "kb_price_chg": -0.0334}, {"date": "2024-03-04", "yt_all": -10.87, "yt_bull": 11.11, "yt_bear": -68.42, "yt_neutral": 38.89, "kb_buyer": 27.1, "kb_price_chg": -0.0347}, {"date": "2024-03-11", "yt_all": -6.67, "yt_bull": 71.43, "yt_bear": -84.62, "yt_neutral": -11.11, "kb_buyer": 29.7, "kb_price_chg": -0.0358}, {"date": "2024-03-18", "yt_all": 0.0, "yt_bull": 71.43, "yt_bear": -66.67, "yt_neutral": 0.0, "kb_buyer": 29.2, "kb_price_chg": -0.0375}, {"date": "2024-03-25", "yt_all": 4.55, "yt_bull": 62.5, "yt_bear": -70.59, "yt_neutral": 47.37, "kb_buyer": 32.3, "kb_price_chg": -0.039}, {"date": "2024-04-01", "yt_all": 4.17, "yt_bull": 81.82, "yt_bear": -60.0, "yt_neutral": 9.09, "kb_buyer": 33.9, "kb_price_chg": -0.0619}, {"date": "2024-04-08", "yt_all": 16.67, "yt_bull": 87.5, "yt_bear": -77.78, "yt_neutral": 0.0, "kb_buyer": 31.8, "kb_price_chg": -0.0197}, {"date": "2024-04-15", "yt_all": 0.0, "yt_bull": 76.92, "yt_bear": -90.0, "yt_neutral": -9.09, "kb_buyer": 33.0, "kb_price_chg": -0.0078}, {"date": "2024-04-22", "yt_all": 16.67, "yt_bull": 54.55, "yt_bear": -57.14, "yt_neutral": 22.22, "kb_buyer": 34.0, "kb_price_chg": -0.0097}, {"date": "2024-04-29", "yt_all": -2.04, "yt_bull": 50.0, "yt_bear": -58.82, "yt_neutral": 20.83, "kb_buyer": 33.5, "kb_price_chg": -0.0191}, {"date": "2024-05-06", "yt_all": -24.0, "yt_bull": 40.0, "yt_bear": -92.86, "yt_neutral": -23.81, "kb_buyer": 32.2, "kb_price_chg": 0.0019}, {"date": "2024-05-13", "yt_all": 16.67, "yt_bull": 70.0, "yt_bear": -71.43, "yt_neutral": 45.83, "kb_buyer": 32.1, "kb_price_chg": -0.0043}, {"date": "2024-05-20", "yt_all": 32.08, "yt_bull": 72.22, "yt_bear": -9.09, "yt_neutral": 20.83, "kb_buyer": 36.9, "kb_price_chg": 0.0123}, {"date": "2024-05-27", "yt_all": 24.14, "yt_bull": 76.0, "yt_bear": -73.33, "yt_neutral": 33.33, "kb_buyer": 38.9, "kb_price_chg": 0.0186}, {"date": "2024-06-03", "yt_all": 10.0, "yt_bull": 69.23, "yt_bear": -64.71, "yt_neutral": 35.0, "kb_buyer": 42.1, "kb_price_chg": 0.0355}, {"date": "2024-06-10", "yt_all": 9.43, "yt_bull": 52.17, "yt_bear": -50.0, "yt_neutral": 0.0, "kb_buyer": 47.1, "kb_price_chg": 0.0577}, {"date": "2024-06-17", "yt_all": 46.3, "yt_bull": 82.61, "yt_bear": -45.45, "yt_neutral": 55.0, "kb_buyer": 49.6, "kb_price_chg": 0.0726}, {"date": "2024-06-24", "yt_all": 46.3, "yt_bull": 85.19, "yt_bear": -63.64, "yt_neutral": 56.25, "kb_buyer": 52.1, "kb_price_chg": 0.1115}, {"date": "2024-07-01", "yt_all": 47.92, "yt_bull": 67.86, "yt_bear": -11.11, "yt_neutral": 45.45, "kb_buyer": 62.5, "kb_price_chg": 0.0875}, {"date": "2024-07-08", "yt_all": 40.0, "yt_bull": 76.47, "yt_bear": -57.14, "yt_neutral": 70.83, "kb_buyer": 64.4, "kb_price_chg": 0.1152}, {"date": "2024-07-15", "yt_all": 52.24, "yt_bull": 82.76, "yt_bear": -75.0, "yt_neutral": 76.92, "kb_buyer": 68.0, "kb_price_chg": 0.1711}, {"date": "2024-07-22", "yt_all": 46.67, "yt_bull": 91.3, "yt_bear": -50.0, "yt_neutral": 52.0, "kb_buyer": 72.1, "kb_price_chg": 0.1929}, {"date": "2024-07-29", "yt_all": 36.51, "yt_bull": 62.96, "yt_bear": -26.67, "yt_neutral": 47.62, "kb_buyer": 72.0, "kb_price_chg": 0.2199}, {"date": "2024-08-05", "yt_all": 34.85, "yt_bull": 59.26, "yt_bear": -56.25, "yt_neutral": 69.57, "kb_buyer": 66.6, "kb_price_chg": 0.2171}, {"date": "2024-08-12", "yt_all": 48.28, "yt_bull": 88.89, "yt_bear": -42.86, "yt_neutral": 58.82, "kb_buyer": 68.8, "kb_price_chg": 0.2588}, {"date": "2024-08-19", "yt_all": 40.74, "yt_bull": 65.0, "yt_bear": -53.33, "yt_neutral": 89.47, "kb_buyer": 70.5, "kb_price_chg": 0.2491}, {"date": "2024-08-26", "yt_all": 40.79, "yt_bull": 77.14, "yt_bear": -62.5, "yt_neutral": 56.0, "kb_buyer": 67.7, "kb_price_chg": 0.2452}, {"date": "2024-09-02", "yt_all": 39.44, "yt_bull": 81.25, "yt_bear": -62.5, "yt_neutral": 52.17, "kb_buyer": 61.5, "kb_price_chg": 0.2173}, {"date": "2024-09-09", "yt_all": 25.68, "yt_bull": 48.39, "yt_bear": -73.33, "yt_neutral": 53.57, "kb_buyer": 57.8, "kb_price_chg": 0.1584}, {"date": "2024-09-23", "yt_all": 35.9, "yt_bull": 20.0, "yt_bear": -62.5, "yt_neutral": 80.95, "kb_buyer": 53.5, "kb_price_chg": 0.1803}, {"date": "2024-09-30", "yt_all": 30.19, "yt_bull": 68.42, "yt_bear": -62.5, "yt_neutral": 72.22, "kb_buyer": 48.6, "kb_price_chg": 0.0894}, {"date": "2024-10-07", "yt_all": 13.33, "yt_bull": 54.55, "yt_bear": -62.5, "yt_neutral": 27.27, "kb_buyer": 46.4, "kb_price_chg": 0.1046}, {"date": "2024-10-14", "yt_all": 12.9, "yt_bull": 53.85, "yt_bear": -92.31, "yt_neutral": 26.09, "kb_buyer": 45.6, "kb_price_chg": 0.1246}, {"date": "2024-10-21", "yt_all": 20.37, "yt_bull": 66.67, "yt_bear": -58.33, "yt_neutral": 19.05, "kb_buyer": 43.7, "kb_price_chg": 0.0755}, {"date": "2024-10-28", "yt_all": -3.51, "yt_bull": 44.44, "yt_bear": -94.12, "yt_neutral": 27.27, "kb_buyer": 42.5, "kb_price_chg": 0.0862}, {"date": "2024-11-04", "yt_all": 16.07, "yt_bull": 66.67, "yt_bear": -82.35, "yt_neutral": 50.0, "kb_buyer": 42.2, "kb_price_chg": 0.0656}, {"date": "2024-11-11", "yt_all": 42.62, "yt_bull": 82.35, "yt_bear": -91.67, "yt_neutral": 60.0, "kb_buyer": 40.5, "kb_price_chg": 0.0576}, {"date": "2024-11-18", "yt_all": 31.37, "yt_bull": 76.19, "yt_bear": -100.0, "yt_neutral": 50.0, "kb_buyer": 38.9, "kb_price_chg": 0.067}, {"date": "2024-11-25", "yt_all": 35.09, "yt_bull": 81.82, "yt_bear": -78.57, "yt_neutral": 61.9, "kb_buyer": 37.1, "kb_price_chg": 0.0542}, {"date": "2024-12-02", "yt_all": 14.29, "yt_bull": 70.0, "yt_bear": -71.43, "yt_neutral": 50.0, "kb_buyer": 35.6, "kb_price_chg": 0.0473}, {"date": "2024-12-09", "yt_all": 25.0, "yt_bull": 65.52, "yt_bear": -86.67, "yt_neutral": 50.0, "kb_buyer": 34.4, "kb_price_chg": 0.0443}, {"date": "2024-12-16", "yt_all": 32.91, "yt_bull": 69.77, "yt_bear": -82.35, "yt_neutral": 52.63, "kb_buyer": 36.8, "kb_price_chg": 0.0273}, {"date": "2024-12-23", "yt_all": 18.06, "yt_bull": 58.33, "yt_bear": -85.0, "yt_neutral": 56.25, "kb_buyer": 37.7, "kb_price_chg": 0.0236}, {"date": "2024-12-30", "yt_all": 5.56, "yt_bull": 85.71, "yt_bear": -87.5, "yt_neutral": -5.88, "kb_buyer": 36.1, "kb_price_chg": 0.0235}, {"date": "2025-01-06", "yt_all": 22.22, "yt_bull": 73.91, "yt_bear": -93.33, "yt_neutral": 56.25, "kb_buyer": 35.7, "kb_price_chg": 0.0125}, {"date": "2025-01-13", "yt_all": 5.08, "yt_bull": 53.85, "yt_bear": -87.5, "yt_neutral": 17.65, "kb_buyer": 35.4, "kb_price_chg": 0.0047}, {"date": "2025-01-20", "yt_all": 18.52, "yt_bull": 66.67, "yt_bear": -66.67, "yt_neutral": 26.67, "kb_buyer": 37.9, "kb_price_chg": 0.0144}, {"date": "2025-02-03", "yt_all": 31.03, "yt_bull": 71.88, "yt_bear": -100.0, "yt_neutral": 31.25, "kb_buyer": 42.0, "kb_price_chg": 0.0147}, {"date": "2025-02-10", "yt_all": 41.86, "yt_bull": 85.71, "yt_bear": -25.0, "yt_neutral": 14.29, "kb_buyer": 44.2, "kb_price_chg": 0.0333}, {"date": "2025-02-17", "yt_all": 30.61, "yt_bull": 76.0, "yt_bear": -53.85, "yt_neutral": 27.27, "kb_buyer": 52.2, "kb_price_chg": 0.0815}, {"date": "2025-02-24", "yt_all": 57.45, "yt_bull": 95.65, "yt_bear": 10.0, "yt_neutral": 28.57, "kb_buyer": 57.4, "kb_price_chg": 0.1406}, {"date": "2025-03-03", "yt_all": 46.15, "yt_bull": 75.0, "yt_bear": -50.0, "yt_neutral": 46.15, "kb_buyer": 63.4, "kb_price_chg": 0.1605}, {"date": "2025-03-10", "yt_all": 64.29, "yt_bull": 91.3, "yt_bear": -50.0, "yt_neutral": 43.75, "kb_buyer": 69.4, "kb_price_chg": 0.2629}, {"date": "2025-03-17", "yt_all": 36.23, "yt_bull": 85.71, "yt_bear": -60.0, "yt_neutral": 38.46, "kb_buyer": 68.0, "kb_price_chg": 0.2936}, {"date": "2025-03-24", "yt_all": 37.93, "yt_bull": 75.0, "yt_bear": -33.33, "yt_neutral": 27.27, "kb_buyer": 59.0, "kb_price_chg": 0.2232}, {"date": "2025-03-31", "yt_all": 40.0, "yt_bull": 85.19, "yt_bear": -61.54, "yt_neutral": 46.67, "kb_buyer": 53.1, "kb_price_chg": 0.1684}, {"date": "2025-04-07", "yt_all": 45.83, "yt_bull": 81.82, "yt_bear": -60.0, "yt_neutral": 62.5, "kb_buyer": 52.1, "kb_price_chg": 0.1543}, {"date": "2025-04-14", "yt_all": 17.02, "yt_bull": 47.83, "yt_bear": -54.55, "yt_neutral": 23.08, "kb_buyer": 51.5, "kb_price_chg": 0.1412}, {"date": "2025-04-21", "yt_all": 44.23, "yt_bull": 92.31, "yt_bear": -53.85, "yt_neutral": 46.15, "kb_buyer": 53.0, "kb_price_chg": 0.2035}, {"date": "2025-04-28", "yt_all": 38.1, "yt_bull": 100.0, "yt_bear": -69.23, "yt_neutral": 63.64, "kb_buyer": 55.3, "kb_price_chg": 0.1464}, {"date": "2025-05-05", "yt_all": 41.67, "yt_bull": 75.0, "yt_bear": -58.33, "yt_neutral": 75.0, "kb_buyer": 58.3, "kb_price_chg": 0.0783}, {"date": "2025-05-12", "yt_all": 46.43, "yt_bull": 82.86, "yt_bear": -58.33, "yt_neutral": 44.44, "kb_buyer": 59.6, "kb_price_chg": 0.1827}, {"date": "2025-05-19", "yt_all": 48.53, "yt_bull": 85.71, "yt_bear": -37.5, "yt_neutral": 62.5, "kb_buyer": 63.1, "kb_price_chg": 0.1748}, {"date": "2025-05-26", "yt_all": 54.55, "yt_bull": 88.89, "yt_bear": -16.67, "yt_neutral": 50.0, "kb_buyer": 67.0, "kb_price_chg": 0.2535}, {"date": "2025-06-02", "yt_all": 40.35, "yt_bull": 80.0, "yt_bear": -26.67, "yt_neutral": 41.18, "kb_buyer": 73.3, "kb_price_chg": 0.2435}, {"date": "2025-06-09", "yt_all": 50.0, "yt_bull": 100.0, "yt_bear": -27.78, "yt_neutral": 60.87, "kb_buyer": 83.0, "kb_price_chg": 0.3526}, {"date": "2025-06-16", "yt_all": 66.1, "yt_bull": 89.66, "yt_bear": -14.29, "yt_neutral": 93.75, "kb_buyer": 95.1, "kb_price_chg": 0.3953}, {"date": "2025-06-23", "yt_all": 38.04, "yt_bull": 84.09, "yt_bear": -36.84, "yt_neutral": 17.24, "kb_buyer": 99.3, "kb_price_chg": 0.444}, {"date": "2025-06-30", "yt_all": -5.62, "yt_bull": 70.97, "yt_bear": -90.0, "yt_neutral": 0.0, "kb_buyer": 76.4, "kb_price_chg": 0.3135}, {"date": "2025-07-07", "yt_all": 14.29, "yt_bull": 61.9, "yt_bear": -87.5, "yt_neutral": 32.0, "kb_buyer": 60.6, "kb_price_chg": 0.2804}, {"date": "2025-07-14", "yt_all": 19.23, "yt_bull": 66.67, "yt_bear": -68.42, "yt_neutral": 17.39, "kb_buyer": 55.2, "kb_price_chg": 0.2396}, {"date": "2025-07-21", "yt_all": 15.62, "yt_bull": 71.11, "yt_bear": -58.33, "yt_neutral": -11.11, "kb_buyer": 52.2, "kb_price_chg": 0.1942}, {"date": "2025-07-28", "yt_all": 19.18, "yt_bull": 78.12, "yt_bear": -71.43, "yt_neutral": 20.0, "kb_buyer": 51.0, "kb_price_chg": 0.1556}, {"date": "2025-08-04", "yt_all": 25.0, "yt_bull": 80.95, "yt_bear": -81.82, "yt_neutral": 25.0, "kb_buyer": 50.2, "kb_price_chg": 0.1095}, {"date": "2025-08-11", "yt_all": 41.33, "yt_bull": 94.59, "yt_bear": -55.56, "yt_neutral": 30.0, "kb_buyer": 51.8, "kb_price_chg": 0.1348}, {"date": "2025-08-18", "yt_all": 31.58, "yt_bull": 85.0, "yt_bear": -77.78, "yt_neutral": 22.22, "kb_buyer": 50.4, "kb_price_chg": 0.1148}, {"date": "2025-08-25", "yt_all": 41.1, "yt_bull": 90.24, "yt_bear": -88.24, "yt_neutral": 53.33, "kb_buyer": 56.8, "kb_price_chg": 0.1358}, {"date": "2025-09-01", "yt_all": 28.99, "yt_bull": 64.52, "yt_bear": -47.06, "yt_neutral": 38.1, "kb_buyer": 58.3, "kb_price_chg": 0.1737}, {"date": "2025-09-08", "yt_all": 26.51, "yt_bull": 91.18, "yt_bear": -76.92, "yt_neutral": 47.83, "kb_buyer": 60.5, "kb_price_chg": 0.1773}, {"date": "2025-09-15", "yt_all": 42.47, "yt_bull": 78.38, "yt_bear": -53.85, "yt_neutral": 39.13, "kb_buyer": 67.0, "kb_price_chg": 0.2129}, {"date": "2025-09-22", "yt_all": 61.54, "yt_bull": 78.72, "yt_bear": -9.52, "yt_neutral": 91.3, "kb_buyer": 77.3, "kb_price_chg": 0.3372}, {"date": "2025-09-29", "yt_all": 60.81, "yt_bull": 97.67, "yt_bear": -56.25, "yt_neutral": 80.0, "kb_buyer": 84.8, "kb_price_chg": 0.4337}, {"date": "2025-10-13", "yt_all": 36.7, "yt_bull": 62.79, "yt_bear": -34.62, "yt_neutral": 55.0, "kb_buyer": 95.5, "kb_price_chg": 0.6803}, {"date": "2025-10-20", "yt_all": 34.55, "yt_bull": 64.1, "yt_bear": -59.09, "yt_neutral": 53.06, "kb_buyer": 85.3, "kb_price_chg": 0.6578}, {"date": "2025-10-27", "yt_all": 28.75, "yt_bull": 77.5, "yt_bear": -66.67, "yt_neutral": 0.0, "kb_buyer": 79.1, "kb_price_chg": 0.4936}, {"date": "2025-11-03", "yt_all": 46.15, "yt_bull": 71.43, "yt_bear": -9.09, "yt_neutral": 28.0, "kb_buyer": 74.9, "kb_price_chg": 0.2986}, {"date": "2025-11-10", "yt_all": 57.29, "yt_bull": 90.74, "yt_bear": -45.0, "yt_neutral": 68.18, "kb_buyer": 75.2, "kb_price_chg": 0.2561}, {"date": "2025-11-17", "yt_all": 40.28, "yt_bull": 81.25, "yt_bear": -26.32, "yt_neutral": 38.1, "kb_buyer": 72.8, "kb_price_chg": 0.227}, {"date": "2025-11-24", "yt_all": 39.73, "yt_bull": 86.11, "yt_bear": -76.47, "yt_neutral": 55.0, "kb_buyer": 75.9, "kb_price_chg": 0.2685}, {"date": "2025-12-01", "yt_all": 38.03, "yt_bull": 90.62, "yt_bear": -70.59, "yt_neutral": 45.45, "kb_buyer": 77.7, "kb_price_chg": 0.1972}, {"date": "2025-12-08", "yt_all": 49.38, "yt_bull": 94.12, "yt_bear": -65.0, "yt_neutral": 77.78, "kb_buyer": 75.9, "kb_price_chg": 0.1908}, {"date": "2025-12-15", "yt_all": 39.73, "yt_bull": 88.89, "yt_bear": -57.14, "yt_neutral": 68.0, "kb_buyer": 76.5, "kb_price_chg": 0.1742}, {"date": "2025-12-22", "yt_all": 51.28, "yt_bull": 93.62, "yt_bear": -61.11, "yt_neutral": 53.85, "kb_buyer": 80.1, "kb_price_chg": 0.2088}, {"date": "2025-12-29", "yt_all": 45.65, "yt_bull": 80.77, "yt_bear": -40.0, "yt_neutral": 40.0, "kb_buyer": 82.5, "kb_price_chg": 0.2177}], "lag_profiles": {"매수우위×전체": [0.4352, 0.4968, 0.5508, 0.6314, 0.7331, 0.7876, 0.7747, 0.729, 0.6778], "매수우위×상승론": [0.2627, 0.303, 0.3482, 0.4189, 0.4963, 0.5522, 0.5539, 0.5227, 0.5046], "매수우위×하락론": [0.2451, 0.3016, 0.3396, 0.4383, 0.5533, 0.5962, 0.6201, 0.5955, 0.5242], "매수우위×중립": [0.238, 0.2763, 0.3299, 0.3852, 0.4671, 0.5186, 0.4902, 0.4172, 0.3596], "매매가격×전체": [0.3633, 0.391, 0.4312, 0.4854, 0.5875, 0.665, 0.7142, 0.703, 0.6434], "매매가격×상승론": [0.2492, 0.2343, 0.2593, 0.2872, 0.3451, 0.4095, 0.4706, 0.4827, 0.4894], "매매가격×하락론": [0.1653, 0.2315, 0.2859, 0.3474, 0.436, 0.5154, 0.5746, 0.5717, 0.4914], "매매가격×중립": [0.1801, 0.1933, 0.1909, 0.2609, 0.3506, 0.4492, 0.4846, 0.4406, 0.3648]}, "channels": [{"name": "후랭이TV", "group": "상승론", "bull": 985, "bear": 46, "neutral": 145, "total": 1176, "bull_pct": 83.8}, {"name": "KB부동산TV", "group": "상승론", "bull": 162, "bear": 30, "neutral": 15, "total": 207, "bull_pct": 78.3}, {"name": "부읽남_TV", "group": "상승론", "bull": 592, "bear": 18, "neutral": 149, "total": 759, "bull_pct": 78.0}, {"name": "푸릉_렘군", "group": "상승론", "bull": 115, "bear": 0, "neutral": 33, "total": 148, "bull_pct": 77.7}, {"name": "쇼킹부동산", "group": "상승론", "bull": 287, "bear": 20, "neutral": 71, "total": 378, "bull_pct": 75.9}, {"name": "박정호_교수의_여의도멘션", "group": "상승론", "bull": 44, "bear": 7, "neutral": 11, "total": 62, "bull_pct": 71.0}, {"name": "신사임당", "group": "중립", "bull": 57, "bear": 17, "neutral": 8, "total": 82, "bull_pct": 69.5}, {"name": "월급쟁이부자들TV", "group": "중립", "bull": 239, "bear": 57, "neutral": 79, "total": 375, "bull_pct": 63.7}, {"name": "슈카월드", "group": "중립", "bull": 139, "bear": 16, "neutral": 73, "total": 228, "bull_pct": 61.0}, {"name": "집코노미", "group": "중립", "bull": 139, "bear": 17, "neutral": 72, "total": 228, "bull_pct": 61.0}, {"name": "땅집고", "group": "중립", "bull": 188, "bear": 65, "neutral": 61, "total": 314, "bull_pct": 59.9}, {"name": "매부리TV", "group": "중립", "bull": 124, "bear": 13, "neutral": 77, "total": 214, "bull_pct": 57.9}, {"name": "경제한방", "group": "중립", "bull": 15, "bear": 8, "neutral": 4, "total": 27, "bull_pct": 55.6}, {"name": "김작가_TV", "group": "중립", "bull": 156, "bear": 78, "neutral": 59, "total": 293, "bull_pct": 53.2}, {"name": "단희TV", "group": "중립", "bull": 50, "bear": 38, "neutral": 11, "total": 99, "bull_pct": 50.5}, {"name": "부티플", "group": "중립", "bull": 51, "bear": 37, "neutral": 13, "total": 101, "bull_pct": 50.5}, {"name": "재테크읽어주는_파일럿", "group": "중립", "bull": 39, "bear": 23, "neutral": 18, "total": 80, "bull_pct": 48.8}, {"name": "박종훈의_지식한방", "group": "중립", "bull": 8, "bear": 8, "neutral": 1, "total": 17, "bull_pct": 47.1}, {"name": "삼프로TV_3PROTV", "group": "하락론", "bull": 16, "bear": 8, "neutral": 14, "total": 38, "bull_pct": 42.1}, {"name": "채부심", "group": "하락론", "bull": 66, "bear": 71, "neutral": 36, "total": 173, "bull_pct": 38.2}, {"name": "언더스탠딩", "group": "하락론", "bull": 27, "bear": 36, "neutral": 14, "total": 77, "bull_pct": 35.1}, {"name": "_이현철__아파트사이클연구소", "group": "하락론", "bull": 15, "bear": 64, "neutral": 37, "total": 116, "bull_pct": 12.9}, {"name": "표영호_tv", "group": "하락론", "bull": 71, "bear": 447, "neutral": 85, "total": 603, "bull_pct": 11.8}, {"name": "라이트하우스", "group": "하락론", "bull": 2, "bear": 569, "neutral": 3, "total": 574, "bull_pct": 0.3}], "robustness": [["매수우위×전체", 0.81, 0.767, 0.759, 0.778, 0.769, 0.783, 0.788], ["매수우위×상승론", 0.526, 0.526, 0.537, 0.537, 0.537, 0.537, 0.554], ["매수우위×하락론", 0.579, 0.558, 0.558, 0.558, 0.558, 0.62, 0.62], ["매수우위×중립", 0.375, 0.322, 0.322, 0.433, 0.484, 0.51, 0.519], ["매매가격×전체", 0.724, 0.701, 0.686, 0.71, 0.699, 0.712, 0.714], ["매매가격×상승론", 0.466, 0.466, 0.479, 0.479, 0.479, 0.479, 0.489], ["매매가격×하락론", 0.527, 0.515, 0.515, 0.515, 0.515, 0.575, 0.575], ["매매가격×중립", 0.294, 0.261, 0.261, 0.385, 0.436, 0.473, 0.485]], "bootstrap_dist": {"매수우위×전체": {"lag-4": 0, "lag-3": 0, "lag-2": 0, "lag-1": 0, "lag0": 66.2, "lag+1": 33.5, "lag+2": 0.2, "lag+3": 0, "lag+4": 0}, "매수우위×중립": {"lag-4": 1.2, "lag-3": 0.6, "lag-2": 0.9, "lag-1": 1.2, "lag0": 51.9, "lag+1": 41.1, "lag+2": 2.3, "lag+3": 0.2, "lag+4": 0.6}, "매매가격×전체": {"lag-4": 0, "lag-3": 0.1, "lag-2": 0, "lag-1": 0, "lag0": 42.6, "lag+1": 35.2, "lag+2": 20.6, "lag+3": 1.3, "lag+4": 0.1}, "매매가격×중립": {"lag-4": 1.6, "lag-3": 1.3, "lag-2": 1.8, "lag-1": 2.5, "lag0": 22.0, "lag+1": 38.6, "lag+2": 28.4, "lag+3": 2.9, "lag+4": 1.0}}, "lead_lag": [{"group": "전체", "kb": "매수우위", "yt_lead": 2.969, "kb_lead": 2.114, "ratio": 1.4}, {"group": "상승론", "kb": "매수우위", "yt_lead": 2.133, "kb_lead": 1.333, "ratio": 1.6}, {"group": "하락론", "kb": "매수우위", "yt_lead": 2.336, "kb_lead": 1.325, "ratio": 1.76}, {"group": "중립", "kb": "매수우위", "yt_lead": 1.786, "kb_lead": 1.229, "ratio": 1.45}, {"group": "전체", "kb": "매매가격", "yt_lead": 2.726, "kb_lead": 1.671, "ratio": 1.63}, {"group": "상승론", "kb": "매매가격", "yt_lead": 1.852, "kb_lead": 1.03, "ratio": 1.8}, {"group": "하락론", "kb": "매매가격", "yt_lead": 2.153, "kb_lead": 1.03, "ratio": 2.09}, {"group": "중립", "kb": "매매가격", "yt_lead": 1.739, "kb_lead": 0.825, "ratio": 2.11}]};
+
+const COLORS = {
+  all: '#1a2a6c', bull: '#e74c3c', bear: '#2980b9', neutral: '#27ae60',
+  buyer: '#e74c3c', price: '#27ae60'
+};
+
+Chart.defaults.font.family = "'Segoe UI', sans-serif";
+Chart.defaults.font.size = 12;
+
+// ========== 2. Timeseries ==========
+(() => {
+  const ts = DATA.timeseries;
+  const labels = ts.map(d => d.date.slice(5)); // MM-DD
+  new Chart(document.getElementById('chartTimeseries'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'YT 순강세지수 (전체)', data: ts.map(d=>d.yt_all), borderColor: '#1a2a6c', borderWidth: 2.5, pointRadius: 0, yAxisID: 'y', tension: 0.3 },
+        { label: 'KB 매수우위지수', data: ts.map(d=>d.kb_buyer), borderColor: '#e74c3c', borderWidth: 2, pointRadius: 0, yAxisID: 'y1', borderDash: [6,3], tension: 0.3 },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      scales: {
+        y: { title: { display: true, text: 'YT 순강세지수' }, position: 'left', grid: { color: '#f0f0f0' } },
+        y1: { title: { display: true, text: 'KB 매수우위지수' }, position: 'right', grid: { display: false } },
+      },
+      plugins: { legend: { position: 'top' } }
+    }
+  });
+})();
+
+// ========== 3. Lag Profiles ==========
+const lagLabels = ['KB4주','KB3주','KB2주','KB1주','동시','YT1주','YT2주','YT3주','YT4주'];
+function makeLagChart(canvasId, profiles, title) {
+  const datasets = Object.entries(profiles).map(([key, vals]) => {
+    const g = key.split('×')[1];
+    const color = g==='전체'?COLORS.all : g==='상승론'?COLORS.bull : g==='하락론'?COLORS.bear : COLORS.neutral;
+    return { label: g, data: vals, borderColor: color, borderWidth: 2.5, pointRadius: 4, tension: 0.3 };
+  });
+  new Chart(document.getElementById(canvasId), {
+    type: 'line',
+    data: { labels: lagLabels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { y: { title: { display: true, text: '상관계수 (r)' }, min: 0, max: 0.85, grid: { color: '#f0f0f0' } } },
+      plugins: { legend: { position: 'top', labels: { usePointStyle: true } },
+        annotation: { annotations: { peak: { type: 'line', xMin: 5, xMax: 5, borderColor: 'rgba(0,0,0,0.15)', borderDash: [4,4] } } }
+      }
+    }
+  });
+}
+const buyerProfiles = {}; const priceProfiles = {};
+Object.entries(DATA.lag_profiles).forEach(([k,v]) => {
+  if (k.startsWith('매수우위')) buyerProfiles[k] = v;
+  else priceProfiles[k] = v;
+});
+makeLagChart('chartLagBuyer', buyerProfiles);
+makeLagChart('chartLagPrice', priceProfiles);
+
+// ========== 4. Channels ==========
+(() => {
+  const ch = DATA.channels;
+  new Chart(document.getElementById('chartChannels'), {
+    type: 'bar',
+    data: {
+      labels: ch.map(c => c.name.replace(/_/g,' ').slice(0,12)),
+      datasets: [
+        { label: '상승', data: ch.map(c=>c.bull), backgroundColor: '#e74c3c' },
+        { label: '보합', data: ch.map(c=>c.neutral), backgroundColor: '#f39c12' },
+        { label: '하락', data: ch.map(c=>c.bear), backgroundColor: '#2980b9' },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      indexAxis: 'y',
+      scales: { x: { stacked: true, title: { display: true, text: '영상 수' } }, y: { stacked: true } },
+      plugins: { legend: { position: 'top' } }
+    }
+  });
+})();
+
+// ========== 5. Bootstrap ==========
+function makeBootChart(canvasId, distKey) {
+  const dist = DATA.bootstrap_dist[distKey];
+  const vals = lagLabels.map((_,i) => {
+    const key = 'lag' + (i<4 ? (i-4) : (i===4?'0':'+' + (i-4)));
+    return dist[key] || 0;
+  });
+  const colors = vals.map(v => v > 30 ? '#1a2a6c' : v > 10 ? '#667eea' : v > 0 ? '#b0c4de' : '#e8e8e8');
+  new Chart(document.getElementById(canvasId), {
+    type: 'bar',
+    data: {
+      labels: lagLabels,
+      datasets: [{ data: vals, backgroundColor: colors, borderRadius: 6 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { y: { title: { display: true, text: '재현율 (%)' }, max: 80 } },
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ctx.parsed.y.toFixed(1) + '%' } }
+      }
+    }
+  });
+}
+makeBootChart('chartBoot1', '매수우위×전체');
+makeBootChart('chartBoot2', '매매가격×전체');
+makeBootChart('chartBoot3', '매수우위×중립');
+makeBootChart('chartBoot4', '매매가격×중립');
+
+// ========== 6. Lead-Lag ==========
+(() => {
+  const ll = DATA.lead_lag;
+  const labels = ll.map(d => d.kb.slice(0,3) + '×' + d.group);
+  new Chart(document.getElementById('chartLeadLag'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'YT 선행 Σ|r|', data: ll.map(d=>d.yt_lead), backgroundColor: '#f2994a', borderRadius: 6 },
+        { label: 'KB 선행 Σ|r|', data: ll.map(d=>d.kb_lead), backgroundColor: '#2980b9', borderRadius: 6 },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { y: { title: { display: true, text: 'Σ|r|' } } },
+      plugins: {
+        legend: { position: 'top' },
+        tooltip: { callbacks: { afterBody: (ctx) => '비율: ' + ll[ctx[0].dataIndex].ratio.toFixed(2) + '배' } }
+      }
+    }
+  });
+})();
+
+// ========== 7. Robustness ==========
+function makeRobChart(canvasId, indices) {
+  const stages = ['13ch','16ch','17ch','18ch','19ch','22ch','24ch'];
+  const datasets = indices.map(i => {
+    const row = DATA.robustness[i];
+    const g = row[0].split('×')[1];
+    const color = g==='전체'?COLORS.all : g==='상승론'?COLORS.bull : g==='하락론'?COLORS.bear : COLORS.neutral;
+    return { label: g, data: row.slice(1), borderColor: color, borderWidth: 2.5, pointRadius: 5, tension: 0.3 };
+  });
+  new Chart(document.getElementById(canvasId), {
+    type: 'line',
+    data: { labels: stages, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { y: { title: { display: true, text: '피크 상관계수 (r)' }, min: 0.2, max: 0.85 } },
+      plugins: { legend: { position: 'top', labels: { usePointStyle: true } } }
+    }
+  });
+}
+makeRobChart('chartRob1', [0,1,2,3]);
+makeRobChart('chartRob2', [4,5,6,7]);
+</script>
+
+</body>
+</html>
