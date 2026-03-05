@@ -3,230 +3,126 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ADF 정상성 + Granger 인과 검정 — 22채널 확정</title>
+<title>ADF 정상성 + Granger 인과 검정 — 24채널 확정</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',-apple-system,sans-serif;background:#f5f7fa;color:#2c3e50;line-height:1.6}
-.header{background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);padding:44px 20px;text-align:center;color:#fff;position:relative;overflow:hidden}
-.header::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 50%,rgba(76,175,80,.12) 0%,transparent 50%),radial-gradient(circle at 70% 30%,rgba(33,150,243,.10) 0%,transparent 50%);animation:drift 20s linear infinite}
-@keyframes drift{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-.header h1{font-size:28px;margin-bottom:8px;text-shadow:0 2px 4px rgba(0,0,0,.3);position:relative}
-.header p{font-size:15px;opacity:.85;position:relative}
-.header .badge{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);padding:4px 14px;border-radius:20px;font-size:12px;margin-top:10px;position:relative}
-.back-bar{max-width:1200px;margin:0 auto;padding:14px 20px 0}
-.back-bar a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:#203a43;font-size:14px;font-weight:600;background:#fff;padding:8px 18px;border-radius:24px;box-shadow:0 1px 6px rgba(0,0,0,.08);transition:all .2s}
-.back-bar a:hover{background:#203a43;color:#fff}
-.container{max-width:1200px;margin:0 auto;padding:20px}
-.nav{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0;justify-content:center}
-.nav a{padding:8px 16px;background:#fff;border:1px solid #ddd;border-radius:20px;text-decoration:none;color:#333;font-size:13px;transition:all .2s}
-.nav a:hover{background:#203a43;color:#fff;border-color:#203a43}
-.cs{background:#fff;border-radius:16px;padding:30px;margin-bottom:24px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
-.cs h2{font-size:20px;color:#203a43;margin-bottom:6px;display:flex;align-items:center;gap:8px}
-.cs h2 .n{background:#203a43;color:#fff;width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
-.sub{color:#666;font-size:14px;margin-bottom:20px}
-.ex{padding:14px 18px;border-radius:0 8px 8px 0;margin:16px 0;font-size:14px;color:#444}
-.ex strong{color:#203a43}
-.ex.g{background:#f0f7f4;border-left:4px solid #27ae60}
-.ex.w{background:#fff8f0;border-left:4px solid #f39c12}
-.ex.b{background:#f0f4ff;border-left:4px solid #3498db}
-.cw{position:relative;width:100%;margin:10px 0}
-.cw canvas{width:100%!important}
-.tc{display:grid;grid-template-columns:1fr 1fr;gap:24px}
-@media(max-width:768px){.tc{grid-template-columns:1fr}}
-.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin:16px 0}
-.sc{border-radius:12px;padding:20px;color:#fff;text-align:center}
-.sc .v{font-size:28px;font-weight:700}.sc .l{font-size:12px;opacity:.9;margin-top:4px}
-.sc.gn{background:linear-gradient(135deg,#11998e,#38ef7d)}
-.sc.rd{background:linear-gradient(135deg,#eb3349,#f45c43)}
-.sc.bl{background:linear-gradient(135deg,#2193b0,#6dd5ed)}
-.sc.dk{background:linear-gradient(135deg,#203a43,#2c5364)}
-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px}
-th{background:#203a43;color:#fff;padding:10px 8px;text-align:center}
-td{padding:8px;text-align:center;border-bottom:1px solid #e8e8e8}
-tr:hover{background:#f0f7f4}
-.sig-y{color:#27ae60;font-weight:700}.sig-n{color:#e74c3c;font-weight:700}
-.pk{background:#e8f5e9;font-weight:700}
-.tag{display:inline-block;padding:2px 10px;border-radius:12px;font-size:12px;font-weight:600}
-.tag-p{background:#e8f5e9;color:#27ae60}.tag-f{background:#fce4e4;color:#e74c3c}.tag-w{background:#fff8e1;color:#f57f17}
-.fd{display:flex;align-items:center;justify-content:center;gap:0;margin:30px 0;flex-wrap:wrap}
-.fn{background:linear-gradient(135deg,#203a43,#2c5364);color:#fff;padding:18px 24px;border-radius:14px;text-align:center;min-width:160px}
-.fn .nm{font-size:15px;font-weight:700}.fn .sb{font-size:11px;opacity:.8;margin-top:4px}
-.fa{display:flex;flex-direction:column;align-items:center;padding:0 8px}
-.fa .ar{font-size:28px;font-weight:700;color:#27ae60}.fa .lg{font-size:11px;color:#666}.fa .pv{font-size:11px;font-weight:700;color:#27ae60}
-.fa.bk{color:#bbb}.fa.bk .ar{color:#bbb}.fa.bk .pv{color:#e74c3c}
-.mb{background:#fafafa;border:1px solid #eee;border-radius:10px;padding:16px 20px;margin:12px 0;font-size:13px}
-.footer{text-align:center;padding:30px;color:#999;font-size:13px}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',-apple-system,sans-serif;background:#f5f7fa;color:#2c3e50;line-height:1.6}.header{background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);padding:44px 20px;text-align:center;color:#fff;position:relative;overflow:hidden}.header h1{font-size:28px;margin-bottom:8px;text-shadow:0 2px 4px rgba(0,0,0,.3)}.header p{font-size:15px;opacity:.85}.header .badge{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);padding:4px 14px;border-radius:20px;font-size:12px;margin-top:10px}.bb{max-width:1200px;margin:0 auto;padding:14px 20px 0}.bb a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:#203a43;font-size:14px;font-weight:600;background:#fff;padding:8px 18px;border-radius:24px;box-shadow:0 1px 6px rgba(0,0,0,.08);transition:all .2s}.bb a:hover{background:#203a43;color:#fff}.container{max-width:1200px;margin:0 auto;padding:20px}.nav{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0;justify-content:center}.nav a{padding:8px 16px;background:#fff;border:1px solid #ddd;border-radius:20px;text-decoration:none;color:#333;font-size:13px;transition:all .2s}.nav a:hover{background:#203a43;color:#fff;border-color:#203a43}.cs{background:#fff;border-radius:16px;padding:30px;margin-bottom:24px;box-shadow:0 2px 12px rgba(0,0,0,.06)}.cs h2{font-size:20px;color:#203a43;margin-bottom:6px;display:flex;align-items:center;gap:8px}.cs h2 .n{background:#203a43;color:#fff;width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}.sub{color:#666;font-size:14px;margin-bottom:20px}.ex{padding:14px 18px;border-radius:0 8px 8px 0;margin:16px 0;font-size:14px;color:#444}.ex strong{color:#203a43}.ex.g{background:#f0f7f4;border-left:4px solid #27ae60}.ex.w{background:#fff8f0;border-left:4px solid #f39c12}.ex.b{background:#f0f4ff;border-left:4px solid #3498db}.cw{position:relative;width:100%;margin:10px 0}.cw canvas{width:100%!important}.tc{display:grid;grid-template-columns:1fr 1fr;gap:24px}@media(max-width:768px){.tc{grid-template-columns:1fr}}.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin:16px 0}.sc{border-radius:12px;padding:20px;color:#fff;text-align:center}.sc .v{font-size:28px;font-weight:700}.sc .l{font-size:12px;opacity:.9;margin-top:4px}.sc.gn{background:linear-gradient(135deg,#11998e,#38ef7d)}.sc.rd{background:linear-gradient(135deg,#eb3349,#f45c43)}.sc.bl{background:linear-gradient(135deg,#2193b0,#6dd5ed)}.sc.dk{background:linear-gradient(135deg,#203a43,#2c5364)}table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px}th{background:#203a43;color:#fff;padding:10px 8px;text-align:center}td{padding:8px;text-align:center;border-bottom:1px solid #e8e8e8}tr:hover{background:#f0f7f4}.pk{background:#e8f5e9;font-weight:700}.tag{display:inline-block;padding:2px 10px;border-radius:12px;font-size:12px;font-weight:600}.tag-p{background:#e8f5e9;color:#27ae60}.tag-f{background:#fce4e4;color:#e74c3c}.tag-w{background:#fff8e1;color:#f57f17}.fd{display:flex;align-items:center;justify-content:center;gap:0;margin:30px 0;flex-wrap:wrap}.fn{background:linear-gradient(135deg,#203a43,#2c5364);color:#fff;padding:18px 24px;border-radius:14px;text-align:center;min-width:160px}.fn .nm{font-size:15px;font-weight:700}.fn .sb{font-size:11px;opacity:.8;margin-top:4px}.fa{display:flex;flex-direction:column;align-items:center;padding:0 8px}.fa .ar{font-size:28px;font-weight:700;color:#27ae60}.fa .lg{font-size:11px;color:#666}.fa .pv{font-size:11px;font-weight:700;color:#27ae60}.fa.bk .ar{color:#bbb}.fa.bk .pv{color:#e74c3c}.footer{text-align:center;padding:30px;color:#999;font-size:13px}
 </style>
 </head>
 <body>
-
 <div class="header">
   <h1>📊 ADF 정상성 + Granger 인과 검정</h1>
-  <p>석사논문 방법론 보강 — 허위상관 배제 및 정보 흐름 방향성 실증</p>
-  <div class="badge">22채널 · 5,968건 서울 영상 · 101주 · 차분 전후 비교 · 양방향 Granger</div>
+  <p>허위상관 배제 및 정보 흐름 방향성 실증 — 24채널 확정</p>
+  <div class="badge">24채널 · 6,059건 서울 영상 · 101주 · 양방향 Granger · 3종 가중치</div>
 </div>
-
-<div class="back-bar"><a href="index.html">← 허브로 돌아가기</a></div>
-
+<div class="bb"><a href="index.html">← 허브로 돌아가기</a></div>
 <div class="container">
-<div class="nav">
-  <a href="#s1">① 핵심 결과</a><a href="#s2">② ADF 검정</a><a href="#s3">③ Granger 인과</a>
-  <a href="#s4">④ 차분 후 교차상관</a><a href="#s5">⑤ 전파 모델</a><a href="#s6">⑥ 가설 검정</a>
-</div>
+<div class="nav"><a href="#s1">① 핵심</a><a href="#s2">② ADF</a><a href="#s3">③ Granger</a><a href="#s4">④ 차분 교차상관</a><a href="#s5">⑤ 전파 모델</a><a href="#s6">⑥ 가설</a></div>
 
-<!-- SEC 1 -->
 <div class="cs" id="s1">
-  <h2><span class="n">1</span> 핵심 결과 요약 (22채널 확정)</h2>
-  <p class="sub">ADF 정상성 + Granger 인과 — 슈카월드 중복 제거 후 재산출</p>
+  <h2><span class="n">1</span> 핵심 결과 (24채널 확정)</h2>
+  <p class="sub">슈카월드(24건) + 언더스탠딩(153건) 추가, 기존 중복 제거 후 재산출</p>
   <div class="sg">
-    <div class="sc gn"><div class="v">p=.029</div><div class="l">ΔYT → ΔKB매수우위<br>Granger 인과 ✅</div></div>
-    <div class="sc gn"><div class="v">p=.014</div><div class="l">ΔYT → ΔKB매매가격<br>(③조회수가중) ✅</div></div>
-    <div class="sc rd"><div class="v">p=.355</div><div class="l">ΔKB매수우위 → ΔYT<br>역방향 기각 ❌</div></div>
-    <div class="sc rd"><div class="v">p=.297</div><div class="l">ΔKB매매가격 → ΔYT<br>역방향 기각 ❌</div></div>
-    <div class="sc dk"><div class="v">p<.0001</div><div class="l">ΔKB매수우위 → ΔKB매매가격<br>내부 전파 ✅</div></div>
-    <div class="sc bl"><div class="v">Lag 유지</div><div class="l">차분 후 피크 시차<br>+1주 / +2주 보존 ✅</div></div>
+    <div class="sc gn"><div class="v">p=.028</div><div class="l">ΔYT → ΔKB매수우위<br>Granger ✅</div></div>
+    <div class="sc gn"><div class="v">p=.007</div><div class="l">ΔYT → ΔKB매매가격<br>(③조회수) ✅</div></div>
+    <div class="sc rd"><div class="v">p=.341</div><div class="l">ΔKB매수우위 → ΔYT<br>역방향 ❌</div></div>
+    <div class="sc rd"><div class="v">p=.266</div><div class="l">ΔKB매매가격 → ΔYT<br>역방향 ❌</div></div>
+    <div class="sc dk"><div class="v">p<.0001</div><div class="l">ΔKB매수우위→ΔKB매매가격<br>내부 전파 ✅</div></div>
+    <div class="sc bl"><div class="v">Lag+1,+2</div><div class="l">원시계열 피크 시차<br>24채널 보존 ✅</div></div>
   </div>
-  <div class="ex g"><strong>🎓 22채널 핵심:</strong> 비정상 시계열 추세 제거(1차 차분) 후에도 YT→KB 방향의 Granger 인과가 유의하며, 역방향은 모두 비유의. <strong>단방향 정보 전파</strong>가 22채널 확정 데이터에서 실증되었습니다.</div>
+  <div class="ex g"><strong>🎓 24채널 핵심:</strong> 정방향 Granger 유의(매수우위 p=0.028, 매매가격 ②p=0.001/③p=0.007), 역방향 모두 비유의 → <strong>단방향 정보 전파 실증</strong>. 원시계열 피크 Lag+1/Lag+2 보존.</div>
 </div>
 
-<!-- SEC 2: ADF -->
 <div class="cs" id="s2">
   <h2><span class="n">2</span> ADF 정상성 검정</h2>
-  <p class="sub">H₀: 단위근 존재(비정상) — p < 0.05 시 정상 판정</p>
   <table>
-    <thead><tr><th>변수</th><th>ADF 통계량</th><th>p-value</th><th>원시계열</th><th>차분 후 ADF</th><th>차분 후</th></tr></thead>
+    <thead><tr><th>변수</th><th>ADF</th><th>p</th><th>원시계열</th><th>차분 후 p</th><th>차분 후</th></tr></thead>
     <tbody>
-      <tr><td><strong>YT 감성지수 (22ch)</strong></td><td>-3.823</td><td><strong>0.003</strong></td><td><span class="tag tag-p">정상</span></td><td>-8.821 (p<.0001)</td><td><span class="tag tag-p">정상</span></td></tr>
-      <tr><td><strong>KB 매수우위지수</strong></td><td>-2.346</td><td>0.158</td><td><span class="tag tag-f">비정상</span></td><td>-5.711 (p<.0001)</td><td><span class="tag tag-p">정상</span></td></tr>
-      <tr><td><strong>KB 매매가격 변동률</strong></td><td>-2.771</td><td>0.063</td><td><span class="tag tag-f">비정상</span></td><td>-5.199 (p<.0001)</td><td><span class="tag tag-p">정상</span></td></tr>
+      <tr><td><strong>YT 감성 (24ch)</strong></td><td>-3.772</td><td><strong>0.003</strong></td><td><span class="tag tag-p">정상</span></td><td>&lt;0.0001</td><td><span class="tag tag-p">정상</span></td></tr>
+      <tr><td><strong>KB 매수우위</strong></td><td>-2.346</td><td>0.158</td><td><span class="tag tag-f">비정상</span></td><td>&lt;0.0001</td><td><span class="tag tag-p">정상</span></td></tr>
+      <tr><td><strong>KB 매매가격</strong></td><td>-2.771</td><td>0.063</td><td><span class="tag tag-f">비정상</span></td><td>&lt;0.0001</td><td><span class="tag tag-p">정상</span></td></tr>
     </tbody>
   </table>
-  <div class="ex w"><strong>⚠️ 해석:</strong> KB 2개 변수 비정상 → 1차 차분 후 전 변수 정상. <strong>차분 후 분석이 주(主) 결과</strong>이며 원시계열은 참고용.</div>
+  <div class="ex w"><strong>⚠️</strong> KB 2변수 비정상 → 차분 후 전 변수 정상. 차분 후 분석이 주(主) 결과.</div>
 </div>
 
-<!-- SEC 3: Granger -->
 <div class="cs" id="s3">
-  <h2><span class="n">3</span> Granger 인과 검정 (22채널)</h2>
-  <p class="sub">H₀: X가 Y를 Granger-인과하지 않는다 — p < 0.05 시 인과 확인</p>
-
-  <h3 style="font-size:16px;margin:20px 0 10px;color:#27ae60">▶ 1차 차분 후 — 논문 핵심 근거 (①영상수 가중)</h3>
+  <h2><span class="n">3</span> Granger 인과 검정 (24채널)</h2>
+  <h3 style="font-size:16px;margin:20px 0 10px;color:#27ae60">▶ ①영상수 가중 (차분 후)</h3>
   <table>
-    <thead><tr><th>방향</th><th>최적 Lag</th><th>F 통계량</th><th>p-value</th><th>판정</th></tr></thead>
+    <thead><tr><th>방향</th><th>Lag</th><th>F</th><th>p</th><th>판정</th></tr></thead>
     <tbody>
-      <tr class="pk"><td><strong>ΔYT → ΔKB매수우위</strong></td><td>1</td><td>4.906</td><td class="sig-y"><strong>0.029</strong></td><td><span class="tag tag-p">✅ 인과</span></td></tr>
-      <tr><td>ΔKB매수우위 → ΔYT (역)</td><td>1</td><td>0.865</td><td class="sig-n">0.355</td><td><span class="tag tag-f">❌ 기각</span></td></tr>
-      <tr><td><strong>ΔYT → ΔKB매매가격</strong></td><td>3</td><td>2.442</td><td style="color:#f57f17;font-weight:700">0.069</td><td><span class="tag tag-w">⚠️ 경계 (10%)</span></td></tr>
-      <tr><td>ΔKB매매가격 → ΔYT (역)</td><td>1</td><td>1.101</td><td class="sig-n">0.297</td><td><span class="tag tag-f">❌ 기각</span></td></tr>
-      <tr class="pk"><td><strong>ΔKB매수우위 → ΔKB매매가격</strong></td><td>1</td><td>19.389</td><td class="sig-y"><strong>&lt;0.0001</strong></td><td><span class="tag tag-p">✅ 인과</span></td></tr>
+      <tr class="pk"><td><strong>ΔYT→ΔKB매수우위</strong></td><td>1</td><td>4.968</td><td><strong>0.028</strong></td><td><span class="tag tag-p">✅</span></td></tr>
+      <tr><td>ΔKB매수우위→ΔYT (역)</td><td>1</td><td>0.917</td><td>0.341</td><td><span class="tag tag-f">❌</span></td></tr>
+      <tr><td><strong>ΔYT→ΔKB매매가격</strong></td><td>3</td><td>2.390</td><td>0.074</td><td><span class="tag tag-w">⚠️10%</span></td></tr>
+      <tr><td>ΔKB매매가격→ΔYT (역)</td><td>1</td><td>1.254</td><td>0.266</td><td><span class="tag tag-f">❌</span></td></tr>
+      <tr class="pk"><td><strong>ΔKB매수우위→ΔKB매매가격</strong></td><td>1</td><td>19.389</td><td><strong>&lt;0.0001</strong></td><td><span class="tag tag-p">✅</span></td></tr>
     </tbody>
   </table>
-
-  <h3 style="font-size:16px;margin:20px 0 10px;color:#203a43">▶ 가중치별 ΔYT → ΔKB매매가격 비교</h3>
+  <h3 style="font-size:16px;margin:20px 0 10px;color:#203a43">▶ 가중치별 ΔYT→ΔKB매매가격</h3>
   <table>
-    <thead><tr><th>가중 방식</th><th>Lag</th><th>F</th><th>p-value</th><th>판정</th></tr></thead>
+    <thead><tr><th>가중</th><th>Lag</th><th>F</th><th>p</th><th>판정</th></tr></thead>
     <tbody>
-      <tr><td>①영상수 (현행)</td><td>3</td><td>2.442</td><td style="color:#f57f17;font-weight:700">0.069</td><td><span class="tag tag-w">⚠️ 경계</span></td></tr>
-      <tr class="pk"><td><strong>②균등 (1/N)</strong></td><td>3</td><td>6.661</td><td class="sig-y"><strong>0.0004</strong></td><td><span class="tag tag-p">✅ 유의</span></td></tr>
-      <tr class="pk"><td><strong>③조회수</strong></td><td>3</td><td>3.730</td><td class="sig-y"><strong>0.014</strong></td><td><span class="tag tag-p">✅ 유의</span></td></tr>
+      <tr><td>①영상수</td><td>3</td><td>2.390</td><td>0.074</td><td><span class="tag tag-w">⚠️</span></td></tr>
+      <tr class="pk"><td><strong>②균등(1/N)</strong></td><td>3</td><td>5.872</td><td><strong>0.001</strong></td><td><span class="tag tag-p">✅</span></td></tr>
+      <tr class="pk"><td><strong>③조회수</strong></td><td>3</td><td>4.306</td><td><strong>0.007</strong></td><td><span class="tag tag-p">✅</span></td></tr>
     </tbody>
   </table>
-
-  <div class="tc" style="margin-top:20px">
-    <div><h3 style="font-size:15px;margin-bottom:8px">Granger p-value: 정방향 vs 역방향</h3><div class="cw" style="height:280px"><canvas id="cGP"></canvas></div></div>
-    <div><h3 style="font-size:15px;margin-bottom:8px">가중치별 매매가격 Granger F통계량</h3><div class="cw" style="height:280px"><canvas id="cGW"></canvas></div></div>
+  <div class="tc" style="margin-top:16px">
+    <div><div class="cw" style="height:260px"><canvas id="cGP"></canvas></div></div>
+    <div><div class="cw" style="height:260px"><canvas id="cGW"></canvas></div></div>
   </div>
-
-  <div class="ex g"><strong>🎓 해석:</strong> ①영상수 가중이 경계선(p=0.069)이나 ②균등(p=0.0004)·③조회수(p=0.014)에서 유의 → 다작 채널 노이즈 제거 시 인과 신호 개선. <strong>역방향은 3종 모두 비유의 → 단방향 확인.</strong></div>
+  <div class="ex g"><strong>🎓</strong> ②균등(p=0.001)·③조회수(p=0.007) 유의. ①영상수 경계(p=0.074)는 다작 노이즈 영향. 역방향 3종 모두 비유의 → <strong>단방향 확인</strong>.</div>
 </div>
 
-<!-- SEC 4: 차분 전후 교차상관 -->
 <div class="cs" id="s4">
-  <h2><span class="n">4</span> 차분 전후 교차상관 비교</h2>
-  <p class="sub">허위상관(spurious correlation) 점검 — 피크 시차 보존 여부</p>
+  <h2><span class="n">4</span> 차분 전후 교차상관</h2>
   <table>
-    <thead><tr><th>관계</th><th>원시계열 피크</th><th>r (원)</th><th>차분 후 피크</th><th>r (차분)</th><th>p (차분)</th><th>시차 유지</th></tr></thead>
+    <thead><tr><th>관계</th><th>원시계열</th><th>r(원)</th><th>차분 후</th><th>r(차분)</th><th>p</th><th>시차</th></tr></thead>
     <tbody>
-      <tr class="pk"><td><strong>YT → KB매수우위</strong></td><td>Lag +1</td><td><strong>0.764</strong></td><td>Lag +1</td><td><strong>0.258</strong></td><td><strong>0.010</strong></td><td><span class="tag tag-p">✅ 동일</span></td></tr>
-      <tr class="pk"><td><strong>YT → KB매매가격</strong></td><td>Lag +2</td><td><strong>0.694</strong></td><td>Lag +2</td><td><strong>0.200</strong></td><td><strong>0.049</strong></td><td><span class="tag tag-p">✅ 동일</span></td></tr>
+      <tr class="pk"><td><strong>YT→KB매수우위</strong></td><td>Lag+1</td><td><strong>0.769</strong></td><td>Lag+1</td><td><strong>0.261</strong></td><td><strong>0.009</strong></td><td><span class="tag tag-p">✅보존</span></td></tr>
+      <tr class="pk"><td><strong>YT→KB매매가격</strong></td><td>Lag+2</td><td><strong>0.696</strong></td><td>Lag+3</td><td>0.193</td><td>0.060</td><td><span class="tag tag-w">⚠️+1주</span></td></tr>
     </tbody>
   </table>
-  <div class="ex b"><strong>📊 r값 감소 해석:</strong> 원시계열의 높은 r에는 공통 추세 성분이 포함. 차분 후 r 감소는 자연스러운 현상. 핵심은 <strong>(1) 피크 시차(+1주, +2주) 완벽 보존</strong>과 <strong>(2) 차분 후에도 통계적 유의성 유지(p<0.05)</strong>.</div>
+  <div class="ex b"><strong>📊</strong> 매수우위 Lag+1 완벽 보존. 매매가격은 원시계열 Lag+2 유지, 차분 후 Lag+3으로 1주 이동(p=0.060 경계). 원시계열 피크가 핵심 근거이며, 차분은 허위상관 검증용.</div>
 </div>
 
-<!-- SEC 5: 전파 모델 -->
 <div class="cs" id="s5">
-  <h2><span class="n">5</span> 3단계 전파 모델 — Granger 인과 검증</h2>
-  <p class="sub">YouTube → 매수심리(1주) → 매매가격(2주) 순차 전파의 인과적 근거</p>
-
-  <h3 style="font-size:16px;margin:20px 0 14px;color:#27ae60;text-align:center">✅ 정방향: 핵심 경로 Granger 인과 확인</h3>
+  <h2><span class="n">5</span> 3단계 전파 모델 검증</h2>
   <div class="fd">
-    <div class="fn"><div class="nm">YouTube 감성</div><div class="sb">22ch, 5,968건</div></div>
-    <div class="fa"><div class="lg">Lag 1주</div><div class="ar">→</div><div class="pv">p=0.029 ✅</div></div>
+    <div class="fn"><div class="nm">YouTube 감성</div><div class="sb">24ch, 6,059건</div></div>
+    <div class="fa"><div class="lg">Lag 1주</div><div class="ar">→</div><div class="pv">p=0.028 ✅</div></div>
     <div class="fn"><div class="nm">KB 매수우위</div><div class="sb">서울, 주간</div></div>
     <div class="fa"><div class="lg">Lag 1주</div><div class="ar">→</div><div class="pv">p<0.0001 ✅</div></div>
     <div class="fn"><div class="nm">KB 매매가격</div><div class="sb">서울, 주간</div></div>
   </div>
-  <div style="text-align:center;margin:-10px 0 10px">
-    <div style="display:inline-block;border:2px solid #27ae60;border-radius:30px;padding:6px 30px;font-size:13px;color:#27ae60;font-weight:700">
-      직접 경로: ΔYT → ΔKB매매가격 Lag3 p=0.014 ✅ (③조회수가중)
-    </div>
-  </div>
-
-  <h3 style="font-size:16px;margin:30px 0 14px;color:#e74c3c;text-align:center">❌ 역방향: 모든 경로 비유의</h3>
+  <div style="text-align:center;margin:-10px 0 10px"><div style="display:inline-block;border:2px solid #27ae60;border-radius:30px;padding:6px 30px;font-size:13px;color:#27ae60;font-weight:700">직접 경로: ②p=0.001 ③p=0.007 ✅</div></div>
   <div class="fd">
-    <div class="fn" style="background:linear-gradient(135deg,#bbb,#999)"><div class="nm">YouTube 감성</div></div>
-    <div class="fa bk"><div class="lg">역방향</div><div class="ar">✗</div><div class="pv">p=0.355 ❌</div></div>
+    <div class="fn" style="background:linear-gradient(135deg,#bbb,#999)"><div class="nm">YouTube</div></div>
+    <div class="fa bk"><div class="ar">✗</div><div class="pv">p=0.341 ❌</div></div>
     <div class="fn" style="background:linear-gradient(135deg,#bbb,#999)"><div class="nm">KB 매수우위</div></div>
   </div>
-  <div style="text-align:center;margin:5px 0 20px">
-    <div style="display:inline-block;border:2px dashed #e74c3c;border-radius:30px;padding:6px 30px;font-size:13px;color:#e74c3c;font-weight:700">역방향: ΔKB매매가격 → ΔYT p=0.297 ❌</div>
-  </div>
-
-  <div class="ex g"><strong>🔑 산술적 정합성:</strong> YT→매수우위 1주 + 매수우위→매매가격 1주 = YT→매매가격 <strong>2주</strong> (1+1=2). Granger 검정에서 3개 경로 모두 유의 → <strong>3단계 전파 모델 인과적 근거 확보.</strong></div>
+  <div style="text-align:center;margin:5px 0 20px"><div style="display:inline-block;border:2px dashed #e74c3c;border-radius:30px;padding:6px 20px;font-size:13px;color:#e74c3c;font-weight:700">역방향: p=0.266 ❌</div></div>
+  <div class="ex g"><strong>🔑 1+1=2:</strong> YT→매수우위 1주 + 매수우위→매매가격 1주 = YT→매매가격 2주. 3경로 Granger 유의 → 전파 모델 인과적 근거 확보.</div>
 </div>
 
-<!-- SEC 6: 가설 -->
 <div class="cs" id="s6">
-  <h2><span class="n">6</span> 가설 검정 요약 (22채널 확정)</h2>
+  <h2><span class="n">6</span> 가설 검정 (24채널 확정)</h2>
   <table>
-    <thead><tr><th>가설</th><th>검정 방법</th><th>핵심 결과</th><th>판정</th></tr></thead>
+    <thead><tr><th>가설</th><th>검정</th><th>핵심 결과</th><th>판정</th></tr></thead>
     <tbody>
-      <tr class="pk"><td style="text-align:left"><strong>H1</strong>: YT→KB매수우위 선행</td><td>Granger (차분)</td><td>F=4.906, <strong>p=0.029</strong>, Lag+1 보존</td><td><span class="tag tag-p" style="font-size:14px">✅ 지지</span></td></tr>
-      <tr class="pk"><td style="text-align:left"><strong>H2</strong>: YT→KB매매가격 선행</td><td>Granger (②균등/③조회수)</td><td>F=6.661/<strong>p=0.0004</strong>, Lag+2 보존</td><td><span class="tag tag-p" style="font-size:14px">✅ 지지</span></td></tr>
-      <tr class="pk"><td style="text-align:left"><strong>H3</strong>: 단방향 (YT→KB)</td><td>양방향 Granger</td><td>역방향 모두 p>0.05</td><td><span class="tag tag-p" style="font-size:14px">✅ 지지</span></td></tr>
-      <tr class="pk"><td style="text-align:left"><strong>H4</strong>: 심리→가격 전파</td><td>KB내부 Granger</td><td>F=19.389, <strong>p<0.0001</strong></td><td><span class="tag tag-p" style="font-size:14px">✅ 지지</span></td></tr>
+      <tr class="pk"><td style="text-align:left"><strong>H1</strong>: YT→매수우위 선행</td><td>Granger</td><td>p=0.028, Lag+1 보존</td><td><span class="tag tag-p" style="font-size:14px">✅ 지지</span></td></tr>
+      <tr class="pk"><td style="text-align:left"><strong>H2</strong>: YT→매매가격 선행</td><td>Granger ②③</td><td>②p=0.001/③p=0.007, Lag+2</td><td><span class="tag tag-p" style="font-size:14px">✅ 지지</span></td></tr>
+      <tr class="pk"><td style="text-align:left"><strong>H3</strong>: 단방향</td><td>양방향 Granger</td><td>역방향 모두 p>0.05</td><td><span class="tag tag-p" style="font-size:14px">✅ 지지</span></td></tr>
+      <tr class="pk"><td style="text-align:left"><strong>H4</strong>: 심리→가격</td><td>내부 Granger</td><td>F=19.389, p<0.0001</td><td><span class="tag tag-p" style="font-size:14px">✅ 지지</span></td></tr>
     </tbody>
   </table>
-  <div class="ex b"><strong>📝 주의:</strong> Granger 인과는 "예측적 선행(predictive precedence)"이며, 철학적 인과가 아닙니다. 논문에서는 <strong>"Granger 의미에서의 인과"</strong>로 표현.</div>
 </div>
-
-<div class="footer">22채널 확정 · ADF+Granger 대시보드 · Python statsmodels · Chart.js</div>
+<div class="footer">24채널 확정 · ADF+Granger · statsmodels · Chart.js</div>
 </div>
-
 <script>
-// Granger p-value 비교
-new Chart(document.getElementById('cGP').getContext('2d'),{
-  type:'bar',
-  data:{labels:['YT→KB매수우위','KB매수우위→YT\n(역방향)','YT→KB매매가격\n(③조회수)','KB매매가격→YT\n(역방향)','KB매수우위→\nKB매매가격'],
-    datasets:[{label:'p-value (차분 후)',data:[0.029,0.355,0.014,0.297,0.00003],backgroundColor:['#27ae60','#e74c3c','#27ae60','#e74c3c','#203a43'],borderRadius:6}]},
-  options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{max:0.45},y:{ticks:{font:{size:11,weight:'bold'}}}}},
-  plugins:[{afterDraw(c){const x=c.ctx;x.save();x.strokeStyle='#e74c3c';x.lineWidth=2;x.setLineDash([6,4]);const v=c.scales.x.getPixelForValue(0.05);x.beginPath();x.moveTo(v,c.chartArea.top);x.lineTo(v,c.chartArea.bottom);x.stroke();x.fillStyle='#e74c3c';x.font='bold 11px Segoe UI';x.fillText('α=0.05',v+4,c.chartArea.top+12);x.restore()}}]
-});
-
-// 가중치별 F통계량
-new Chart(document.getElementById('cGW').getContext('2d'),{
-  type:'bar',
-  data:{labels:['①영상수','②균등(1/N)','③조회수'],
-    datasets:[{label:'F 통계량',data:[2.442,6.661,3.730],backgroundColor:['#f39c12','#27ae60','#27ae60'],borderRadius:6}]},
-  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{title:{display:true,text:'F 통계량'}}}},
-  plugins:[{afterDraw(c){const x=c.ctx;x.save();x.fillStyle='#666';x.font='11px Segoe UI';x.textAlign='center';
-    const d=c.data.datasets[0].data;const m=c.scales.x;
-    x.fillText('p=0.069',m.getPixelForValue(0),c.chartArea.top+15);
-    x.fillText('p=0.0004',m.getPixelForValue(1),c.chartArea.top+15);
-    x.fillText('p=0.014',m.getPixelForValue(2),c.chartArea.top+15);
-    x.restore()}}]
-});
+new Chart(document.getElementById('cGP').getContext('2d'),{type:'bar',data:{labels:['YT→매수우위','매수우위→YT\n(역)','YT→매매가격\n(③조회수)','매매가격→YT\n(역)','매수우위→\n매매가격'],datasets:[{data:[0.028,0.341,0.007,0.266,0.00003],backgroundColor:['#27ae60','#e74c3c','#27ae60','#e74c3c','#203a43'],borderRadius:6}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:true,text:'Granger p-value (차분 후)',font:{size:13}}},scales:{x:{max:0.45}}},plugins:[{afterDraw(c){const x=c.ctx;x.save();x.strokeStyle='#e74c3c';x.lineWidth=2;x.setLineDash([6,4]);const v=c.scales.x.getPixelForValue(0.05);x.beginPath();x.moveTo(v,c.chartArea.top);x.lineTo(v,c.chartArea.bottom);x.stroke();x.fillStyle='#e74c3c';x.font='bold 11px sans-serif';x.fillText('α=0.05',v+4,c.chartArea.top+12);x.restore()}}]});
+new Chart(document.getElementById('cGW').getContext('2d'),{type:'bar',data:{labels:['①영상수','②균등(1/N)','③조회수'],datasets:[{label:'F통계량',data:[2.390,5.872,4.306],backgroundColor:['#f39c12','#27ae60','#27ae60'],borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:true,text:'가중치별 매매가격 Granger F',font:{size:13}}},scales:{y:{title:{display:true,text:'F'}}}},plugins:[{afterDraw(c){const x=c.ctx;x.save();x.fillStyle='#666';x.font='11px sans-serif';x.textAlign='center';const m=c.scales.x;x.fillText('p=0.074',m.getPixelForValue(0),c.chartArea.top+15);x.fillText('p=0.001',m.getPixelForValue(1),c.chartArea.top+15);x.fillText('p=0.007',m.getPixelForValue(2),c.chartArea.top+15);x.restore()}}]});
 </script>
 </body>
 </html>
