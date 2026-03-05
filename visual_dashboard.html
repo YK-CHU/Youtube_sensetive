@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>22채널 유튜브 부동산 감성분석 — 시각화 대시보드</title>
+<title>24채널 유튜브 부동산 감성분석 — 시각화 대시보드</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -53,7 +53,7 @@ tr:hover { background: #f0f4ff; }
 
 <div class="header">
   <h1>📊 유튜브 부동산 감성지수 × 서울 주택시장</h1>
-  <p>22채널 · 6,369건 · 101주 (2024.01 ~ 2025.12) — 논문용 시각화 대시보드</p>
+  <p>24채널 · 6,059건 · 101주 (2024.01 ~ 2025.12) — 논문용 시각화 대시보드</p>
 </div>
 
 <div class="container">
@@ -71,7 +71,7 @@ tr:hover { background: #f0f4ff; }
 
 <div class="chart-section" id="sec1">
   <h2><span class="num">1</span> 핵심 지표 요약</h2>
-  <p class="subtitle">22채널 최종 분석의 주요 결과를 한눈에</p>
+  <p class="subtitle">24채널 최종 분석의 주요 결과를 한눈에</p>
   <div class="stat-grid">
     <div class="stat-card"><div class="val">0.788</div><div class="label">매수우위 × 전체<br>피크 상관계수 (YT 1주 선행)</div></div>
     <div class="stat-card green"><div class="val">0.714</div><div class="label">매매가격 × 전체<br>피크 상관계수 (YT 2주 선행)</div></div>
@@ -116,7 +116,7 @@ tr:hover { background: #f0f4ff; }
 </div>
 
 <div class="chart-section" id="sec4">
-  <h2><span class="num">4</span> 22채널 감성 분포</h2>
+  <h2><span class="num">4</span> 24채널 감성 분포</h2>
   <p class="subtitle">각 채널의 상승/하락/보합 비율 — 상승론(빨강) 6개, 하락론(파랑) 6개, 중립(초록) 12개</p>
   <div class="chart-wrap" style="height:600px"><canvas id="chartChannels"></canvas></div>
   <div class="explain">
@@ -223,7 +223,7 @@ tr:hover { background: #f0f4ff; }
 </div>
 
 <div class="footer">
-  유튜브 부동산 감성지수 × 서울 주택시장 시차 상관관계 분석 | 22채널 · 6,369건 · 101주 | 2024.01~2025.12
+  유튜브 부동산 감성지수 × 서울 주택시장 시차 상관관계 분석 | 24채널 · 6,369건 · 101주 | 2024.01~2025.12
 </div>
 
 <script>
@@ -390,3 +390,4 @@ makeRobChart('chartRob2', [4,5,6,7]);
 </body>
 
 </html>
+
