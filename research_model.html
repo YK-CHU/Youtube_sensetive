@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>연구 모형: 3단계 정보 전파 경로</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fafbfc;
+  --card: #ffffff;
+  --text: #1a1a2e;
+  --muted: #6b7280;
+  --accent-blue: #2563eb;
+  --accent-green: #059669;
+  --accent-red: #dc2626;
+  --accent-amber: #d97706;
+  --accent-purple: #7c3aed;
+  --border: #e5e7eb;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  --shadow-lg: 0 4px 24px rgba(0,0,0,0.08), 0 12px 48px rgba(0,0,0,0.04);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--text); }
+.page { max-width:1100px; margin:0 auto; padding:40px 24px 60px; }
+.back { display:inline-flex; align-items:center; gap:6px; text-decoration:none; color:var(--muted); font-size:13px; font-weight:500; margin-bottom:24px; transition:color .2s; }
+.back:hover { color:var(--accent-blue); }
+
+/* HEADER */
+.title-block { text-align:center; margin-bottom:48px; }
+.title-block .fig-num { font-family:'IBM Plex Mono',monospace; font-size:13px; letter-spacing:2px; text-transform:uppercase; color:var(--accent-blue); font-weight:600; margin-bottom:8px; }
+.title-block h1 { font-size:26px; font-weight:900; letter-spacing:-0.5px; margin-bottom:6px; }
+.title-block .sub { font-size:14px; color:var(--muted); font-weight:400; }
+.title-block .badge-row { display:flex; gap:8px; justify-content:center; margin-top:14px; flex-wrap:wrap; }
+.badge { display:inline-block; padding:4px 12px; border-radius:100px; font-size:11px; font-weight:600; letter-spacing:0.3px; }
+.badge.b { background:#eff6ff; color:var(--accent-blue); border:1px solid #bfdbfe; }
+.badge.g { background:#ecfdf5; color:var(--accent-green); border:1px solid #a7f3d0; }
+.badge.p { background:#f5f3ff; color:var(--accent-purple); border:1px solid #c4b5fd; }
+
+/* CONTROL VARIABLES - TOP */
+.ctrl-section { margin-bottom:12px; position:relative; }
+.ctrl-box { background:linear-gradient(135deg,#f8fafc,#f1f5f9); border:1.5px dashed #cbd5e1; border-radius:14px; padding:20px 28px; text-align:center; position:relative; }
+.ctrl-box .label { font-size:12px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#94a3b8; margin-bottom:10px; }
+.ctrl-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.ctrl-item { background:#fff; border-radius:8px; padding:10px 14px; border:1px solid var(--border); }
+.ctrl-item .cat { font-size:10px; font-weight:700; color:var(--accent-blue); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; }
+.ctrl-item .vars { font-size:12px; color:#475569; line-height:1.5; }
+.ctrl-item .result { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--accent-green); font-weight:600; margin-top:6px; }
+.ctrl-arrows { display:flex; justify-content:center; gap:180px; padding:8px 0; }
+.ctrl-arrow { display:flex; flex-direction:column; align-items:center; color:#94a3b8; font-size:10px; font-weight:600; letter-spacing:1px; }
+.ctrl-arrow svg { width:20px; height:24px; }
+
+/* MAIN FLOW - CENTER */
+.flow-section { position:relative; margin:0 0 12px; }
+.flow-main { display:flex; align-items:stretch; justify-content:center; gap:0; }
+.var-box { flex:0 0 260px; border-radius:16px; padding:24px 20px; position:relative; box-shadow:var(--shadow-lg); overflow:hidden; }
+.var-box::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; }
+.var-box.iv { background:#eff6ff; border:1.5px solid #bfdbfe; }
+.var-box.iv::before { background:linear-gradient(90deg,#3b82f6,#2563eb); }
+.var-box.mv { background:#fff7ed; border:1.5px solid #fed7aa; }
+.var-box.mv::before { background:linear-gradient(90deg,#f59e0b,#d97706); }
+.var-box.dv { background:#fef2f2; border:1.5px solid #fecaca; }
+.var-box.dv::before { background:linear-gradient(90deg,#ef4444,#dc2626); }
+.var-type { font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:2px; }
+.var-box.iv .var-type { color:var(--accent-blue); }
+.var-box.mv .var-type { color:var(--accent-amber); }
+.var-box.dv .var-type { color:var(--accent-red); }
+.var-name { font-size:17px; font-weight:900; margin-bottom:2px; letter-spacing:-0.3px; }
+.var-eng { font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted); margin-bottom:12px; }
+.var-stats { list-style:none; }
+.var-stats li { font-size:12px; color:#475569; padding:3px 0; display:flex; align-items:center; gap:6px; }
+.var-stats li .dot { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+.var-box.iv .dot { background:var(--accent-blue); }
+.var-box.mv .dot { background:var(--accent-amber); }
+.var-box.dv .dot { background:var(--accent-red); }
+.var-stats .mono { font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:11px; }
+
+/* ARROWS */
+.arrow-block { flex:0 0 80px; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; padding:0 4px; }
+.arrow-hyp { font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; color:var(--accent-green); background:#ecfdf5; border:1px solid #a7f3d0; border-radius:100px; padding:2px 10px; margin-bottom:6px; white-space:nowrap; }
+.arrow-lag { font-size:12px; font-weight:700; color:var(--text); margin-bottom:2px; }
+.arrow-line { width:100%; height:3px; background:var(--accent-green); position:relative; border-radius:2px; }
+.arrow-line::after { content:''; position:absolute; right:-6px; top:-5px; border:6px solid transparent; border-left:8px solid var(--accent-green); }
+.arrow-pval { font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; color:var(--accent-green); margin-top:4px; }
+.arrow-sig { font-size:10px; color:var(--accent-green); font-weight:700; }
+
+/* DIRECT PATH - BOTTOM ARC */
+.direct-path { position:relative; margin:-8px 50px 0; border:2px solid var(--accent-green); border-top:none; border-radius:0 0 24px 24px; height:60px; }
+.direct-label { position:absolute; bottom:-12px; left:50%; transform:translateX(-50%); background:var(--bg); padding:0 16px; white-space:nowrap; }
+.direct-label .hyp { font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; color:var(--accent-green); background:#ecfdf5; border:1px solid #a7f3d0; border-radius:100px; padding:2px 10px; }
+.direct-label .info { font-size:11px; color:var(--text); font-weight:600; margin-left:8px; }
+.direct-label .pval { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--accent-green); font-weight:600; margin-left:4px; }
+
+/* REVERSE PATH */
+.reverse-section { margin:20px 50px 0; position:relative; }
+.reverse-box { border:1.5px dashed #fca5a5; border-radius:12px; padding:14px 20px; background:#fef2f2; display:flex; align-items:center; justify-content:center; gap:24px; flex-wrap:wrap; }
+.reverse-title { font-size:12px; font-weight:700; color:var(--accent-red); letter-spacing:0.5px; }
+.reverse-item { display:flex; align-items:center; gap:6px; font-size:11px; color:#6b7280; }
+.reverse-item .x { color:var(--accent-red); font-weight:900; font-size:14px; }
+.reverse-item .mono { font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--accent-red); }
+
+/* CONSISTENCY */
+.consistency { margin:20px 0 0; text-align:center; }
+.consistency-box { display:inline-flex; align-items:center; gap:12px; background:linear-gradient(135deg,#ecfdf5,#f0fdf4); border:1.5px solid #86efac; border-radius:12px; padding:12px 24px; }
+.consistency-icon { font-size:24px; }
+.consistency-text { font-size:13px; font-weight:700; color:#065f46; }
+.consistency-formula { font-family:'IBM Plex Mono',monospace; font-size:14px; font-weight:700; color:var(--accent-green); }
+
+/* ROBUSTNESS - BOTTOM */
+.robust-section { margin-top:32px; }
+.robust-header { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+.robust-header .line { flex:1; height:1px; background:#d1d5db; }
+.robust-header .label { font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#9ca3af; white-space:nowrap; }
+.robust-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
+@media(max-width:768px) { .robust-grid { grid-template-columns:repeat(2,1fr); } .flow-main { flex-direction:column; align-items:center; } .arrow-block { transform:rotate(90deg); } .var-box { flex:none; width:100%; } .direct-path { display:none; } .ctrl-grid { grid-template-columns:1fr; } }
+.robust-card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px 12px; text-align:center; transition:box-shadow .2s, transform .2s; }
+.robust-card:hover { box-shadow:var(--shadow); transform:translateY(-2px); }
+.robust-card .num { font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; color:var(--accent-purple); margin-bottom:4px; }
+.robust-card .name { font-size:13px; font-weight:700; color:var(--text); margin-bottom:6px; }
+.robust-card .desc { font-size:11px; color:var(--muted); line-height:1.5; }
+.robust-card .result { font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--accent-green); font-weight:600; margin-top:6px; background:#f0fdf4; border-radius:4px; padding:3px 6px; display:inline-block; }
+
+/* PARTIAL CORR SECTION */
+.partial-section { margin-top:24px; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px 24px; box-shadow:var(--shadow); }
+.partial-title { font-size:13px; font-weight:700; color:var(--accent-purple); margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+.partial-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.partial-item { background:#f8fafc; border-radius:10px; padding:14px; border:1px solid #e2e8f0; }
+.partial-item .label { font-size:11px; font-weight:600; color:var(--muted); margin-bottom:6px; }
+.partial-item .flow { display:flex; align-items:center; gap:8px; font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:600; }
+.partial-item .flow .from { color:var(--accent-blue); }
+.partial-item .flow .arr { color:#94a3b8; }
+.partial-item .flow .to { color:var(--accent-green); }
+.partial-item .detail { font-size:11px; color:#6b7280; margin-top:4px; }
+
+.footer { text-align:center; margin-top:48px; padding-top:24px; border-top:1px solid var(--border); color:var(--muted); font-size:11px; line-height:1.8; }
+
+/* ANIMATION */
+@keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+.animate { animation: fadeUp 0.6s ease-out both; }
+.d1 { animation-delay:0.1s; } .d2 { animation-delay:0.2s; } .d3 { animation-delay:0.3s; }
+.d4 { animation-delay:0.4s; } .d5 { animation-delay:0.5s; } .d6 { animation-delay:0.6s; }
+</style>
+</head>
+<body>
+<div class="page">
+<a href="index.html" class="back">← 허브로 돌아가기</a>
+
+<div class="title-block animate">
+  <div class="fig-num">Figure 3-1 · Research Model</div>
+  <h1>3단계 정보 전파 경로 연구 모형</h1>
+  <div class="sub">YouTube Sentiment → Buying Psychology (1 week) → Transaction Price (1 week)</div>
+  <div class="badge-row">
+    <span class="badge b">24채널 · 6,059건</span>
+    <span class="badge g">Granger 인과 검증</span>
+    <span class="badge p">강건성 5종</span>
+  </div>
+</div>
+
+<!-- CONTROL VARIABLES -->
+<div class="ctrl-section animate d1">
+  <div class="ctrl-box">
+    <div class="label">통제변수 Control Variables</div>
+    <div class="ctrl-grid">
+      <div class="ctrl-item">
+        <div class="cat">금융 Financial</div>
+        <div class="vars">기준금리 (3.5→2.5%)<br>주담대금리 (4.32→4.13%)</div>
+        <div class="result">편상관 통제 후에도 유의 ✓</div>
+      </div>
+      <div class="ctrl-item">
+        <div class="cat">심리 Sentiment</div>
+        <div class="vars">소비자심리지수 CCSI<br>주택가격전망 HPI-CSI</div>
+        <div class="result">편상관 통제 후에도 유의 ✓</div>
+      </div>
+      <div class="ctrl-item">
+        <div class="cat">정책 Policy</div>
+        <div class="vars">부동산 대책 더미 12개<br>규제강화(-1) / 완화(+1)</div>
+        <div class="result">편상관 통제 후에도 유의 ✓</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="ctrl-arrows animate d1">
+  <div class="ctrl-arrow">
+    <svg viewBox="0 0 20 24"><path d="M10 0 L10 18 M4 12 L10 18 L16 12" stroke="#94a3b8" stroke-width="2" fill="none"/></svg>
+    통제
+  </div>
+  <div class="ctrl-arrow">
+    <svg viewBox="0 0 20 24"><path d="M10 0 L10 18 M4 12 L10 18 L16 12" stroke="#94a3b8" stroke-width="2" fill="none"/></svg>
+    통제
+  </div>
+</div>
+
+<!-- MAIN FLOW -->
+<div class="flow-section animate d2">
+  <div class="flow-main">
+    <!-- IV -->
+    <div class="var-box iv">
+      <div class="var-type">Independent Variable</div>
+      <div class="var-name">유튜브 감성지수</div>
+      <div class="var-eng">YT Seoul Sentiment Index</div>
+      <ul class="var-stats">
+        <li><span class="dot"></span>24채널 (상승론5 · 하락론4 · 중립15)</li>
+        <li><span class="dot"></span>서울 영상 <span class="mono">6,059건</span></li>
+        <li><span class="dot"></span>3분류: 상승 / 보합 / 하락</li>
+        <li><span class="dot"></span>AI: Claude Sonnet 4.5</li>
+        <li><span class="dot"></span>3종 가중치 비교</li>
+      </ul>
+    </div>
+
+    <!-- Arrow 1 -->
+    <div class="arrow-block">
+      <div class="arrow-hyp">H1</div>
+      <div class="arrow-lag">선행 +1주</div>
+      <div class="arrow-line"></div>
+      <div class="arrow-pval">p = 0.028</div>
+      <div class="arrow-sig">Granger ✅</div>
+    </div>
+
+    <!-- MV -->
+    <div class="var-box mv">
+      <div class="var-type">Mediator Variable</div>
+      <div class="var-name">KB 매수우위지수</div>
+      <div class="var-eng">KB Buying Sentiment · Seoul</div>
+      <ul class="var-stats">
+        <li><span class="dot"></span>주간 조사, 범위 <span class="mono">0~200</span></li>
+        <li><span class="dot"></span>교차상관 <span class="mono">r = 0.769</span></li>
+        <li><span class="dot"></span>편상관 <span class="mono">r = 0.476</span> (p&lt;0.001)</li>
+        <li><span class="dot"></span>ADF 비정상 → 차분 후 정상</li>
+        <li><span class="dot"></span>차분 후 피크 Lag+1 보존</li>
+      </ul>
+    </div>
+
+    <!-- Arrow 2 -->
+    <div class="arrow-block">
+      <div class="arrow-hyp">H4</div>
+      <div class="arrow-lag">전파 +1주</div>
+      <div class="arrow-line"></div>
+      <div class="arrow-pval">p < 0.0001</div>
+      <div class="arrow-sig">Granger ✅</div>
+    </div>
+
+    <!-- DV -->
+    <div class="var-box dv">
+      <div class="var-type">Dependent Variable</div>
+      <div class="var-name">KB 매매가격 변동률</div>
+      <div class="var-eng">KB Price Change Rate · Seoul</div>
+      <ul class="var-stats">
+        <li><span class="dot"></span>주간, 전주 대비 <span class="mono">%</span> 변화</li>
+        <li><span class="dot"></span>교차상관 <span class="mono">r = 0.696</span></li>
+        <li><span class="dot"></span>편상관 <span class="mono">r = 0.319</span> (p=0.001)</li>
+        <li><span class="dot"></span>ADF 비정상 → 차분 후 정상</li>
+        <li><span class="dot"></span>원시계열 피크 Lag+2 보존</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- DIRECT PATH ARC -->
+<div class="direct-path animate d3">
+  <div class="direct-label">
+    <span class="hyp">H2</span>
+    <span class="info">직접 경로: 선행 +2주</span>
+    <span class="pval">②p=0.001 ③p=0.007 ✅</span>
+  </div>
+</div>
+
+<!-- REVERSE PATH -->
+<div class="reverse-section animate d4">
+  <div class="reverse-box">
+    <div class="reverse-title">H3 역방향 검정 — 모두 기각</div>
+    <div class="reverse-item">
+      <span class="x">✗</span>
+      KB매수우위 → YT
+      <span class="mono">p=0.341</span>
+    </div>
+    <div class="reverse-item">
+      <span class="x">✗</span>
+      KB매매가격 → YT
+      <span class="mono">p=0.266</span>
+    </div>
+    <div style="font-size:11px;color:var(--accent-red);font-weight:700;">→ 단방향 정보 흐름 확인</div>
+  </div>
+</div>
+
+<!-- CONSISTENCY -->
+<div class="consistency animate d4">
+  <div class="consistency-box">
+    <div class="consistency-icon">🔑</div>
+    <div>
+      <div class="consistency-text">내적 정합성 (Arithmetic Consistency)</div>
+      <div class="consistency-formula">1주 (YT→매수우위) + 1주 (매수우위→매매가격) = 2주 (YT→매매가격)</div>
+    </div>
+  </div>
+</div>
+
+<!-- PARTIAL CORRELATION -->
+<div class="partial-section animate d5">
+  <div class="partial-title">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#7c3aed" stroke-width="1.5"/><path d="M5 8h6M8 5v6" stroke="#7c3aed" stroke-width="1.5"/></svg>
+    편상관 분석 — 통제변수 6개 투입 후 독립적 설명력
+  </div>
+  <div class="partial-grid">
+    <div class="partial-item">
+      <div class="label">YT → KB 매수우위 (Lag+1)</div>
+      <div class="flow">
+        <span class="from">r=0.769</span>
+        <span class="arr">→ 통제 후 →</span>
+        <span class="to">r=0.476</span>
+      </div>
+      <div class="detail">감소 38.1% · p &lt; 0.001 · 통제 후에도 고도 유의</div>
+    </div>
+    <div class="partial-item">
+      <div class="label">YT → KB 매매가격 (Lag+2)</div>
+      <div class="flow">
+        <span class="from">r=0.696</span>
+        <span class="arr">→ 통제 후 →</span>
+        <span class="to">r=0.319</span>
+      </div>
+      <div class="detail">감소 54.1% · p = 0.001 · 통제 후에도 유의</div>
+    </div>
+  </div>
+</div>
+
+<!-- ROBUSTNESS -->
+<div class="robust-section animate d6">
+  <div class="robust-header">
+    <div class="line"></div>
+    <div class="label">Robustness Checks · 강건성 검증 5종</div>
+    <div class="line"></div>
+  </div>
+  <div class="robust-grid">
+    <div class="robust-card">
+      <div class="num">R1</div>
+      <div class="name">ADF 정상성</div>
+      <div class="desc">차분 전후 피크 시차 비교<br>비정상→차분 후 전 변수 정상</div>
+      <div class="result">Lag+1, Lag+2 보존 ✓</div>
+    </div>
+    <div class="robust-card">
+      <div class="num">R2</div>
+      <div class="name">Granger 양방향</div>
+      <div class="desc">정방향 + 역방향 동시 검정<br>단방향 정보 흐름 확인</div>
+      <div class="result">역방향 p&gt;0.05 모두 기각 ✓</div>
+    </div>
+    <div class="robust-card">
+      <div class="num">R3</div>
+      <div class="name">3종 가중치</div>
+      <div class="desc">영상수 / 균등(1/N) / 조회수<br>가중 방식 무관 결과 일관</div>
+      <div class="result">매수우위 3종 Lag+1 일치 ✓</div>
+    </div>
+    <div class="robust-card">
+      <div class="num">R4</div>
+      <div class="name">Block Bootstrap</div>
+      <div class="desc">B=5,000 블록 리샘플링<br>피크 시차 95% CI 산출</div>
+      <div class="result">피크 CI 내 집중 ✓</div>
+    </div>
+    <div class="robust-card">
+      <div class="num">R5</div>
+      <div class="name">채널 확장</div>
+      <div class="desc">13→16→19→…→24채널<br>다단계 확장 시 안정성</div>
+      <div class="result">전 단계 피크 안정 ✓</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  석사논문 · 유튜브 부동산 감성분석과 서울 아파트 시장 지표의 시차 관계 연구<br>
+  24채널 · 6,059건 · 101주 · Claude Sonnet 4.5 · Granger 인과 검증
+</div>
+</div>
+</body>
+</html>
